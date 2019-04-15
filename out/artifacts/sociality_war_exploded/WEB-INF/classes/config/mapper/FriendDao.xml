@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.nieyue.dao.FriendDao">
+<!-- 添加 -->
+<insert id="add" parameterType="Friend" keyProperty="friendId" flushCache="true"  >
+   INSERT IGNORE INTO
+   		  friend_tb
+   		 (
+   		 create_date,
+   		 update_date,
+   		 account_id,
+   		 friend_account_id
+   		 )
+   VALUES
+    	 (
+    	 #{createDate},
+    	 #{updateDate},
+    	 #{accountId},
+    	 #{friendAccountId}
+    	 )
+</insert>  
+<!-- 更新 -->
+<update id="update" parameterType="Friend" >
+    UPDATE 
+    	friend_tb
+    <set>
+		<if test="createDate!=null">
+			create_date=#{createDate},
+		</if>
+		<if test="updateDate!=null">
+			update_date=#{updateDate},
+		</if>
+		<if test="accountId!=null">
+			account_id=#{accountId},
+		</if>
+		<if test="friendAccountId!=null">
+			friend_account_id=#{friendAccountId},
+		</if>
+	</set>
+    WHERE
+    	 friend_id=#{friendId}
+</update> 
+<!-- 删除-->
+<delete id="delete"  parameterType="Integer" >
+    DELETE FROM
+    	 friend_tb
+    	 WHERE friend_id=#{friendId}
+</delete>  
+<!-- 加载-->
+<select id="load" parameterType="Integer" resultType="Friend" >
+SELECT 
+		friend_id,
+    	create_date,
+    	update_date,
+    	account_id,
+    	friend_account_id
+FROM friend_tb
+WHERE friend_id=#{friendId}
+</select>
+
+<!-- 列表-->
+<select id="list" resultType="Friend">
+        SELECT
+		friend_id,
+		create_date,
+		update_date,
+		account_id,
+		friend_account_id
+	FROM friend_tb
+	<where>
+		<if test="accountId!=null">
+			AND account_id=#{accountId}
+		</if>
+		<if test="friendAccountId!=null">
+			AND friend_account_id=#{friendAccountId}
+		</if>
+		AND ${orderName}
+		<if test="orderWay=='asc'">
+		<![CDATA[>=]]>
+		</if>
+		<if test="orderWay=='desc'">
+		  <![CDATA[<= ]]>
+		</if>
+		(SELECT ${orderName} FROM friend_tb
+			<where>
+				<if test="accountId!=null">
+					AND account_id=#{accountId}
+				</if>
+				<if test="friendAccountId!=null">
+					AND friend_account_id=#{friendAccountId}
+				</if>
+			</where>
+			ORDER BY
+				${orderName}  ${orderWay}
+			LIMIT #{pageNum}, 1
+		)
+	</where>
+	ORDER BY
+		${orderName}  ${orderWay}
+	LIMIT
+		#{pageSize}
+</select> 
+
+<!-- 数目 -->
+<select id="count"  resultType="int">
+	SELECT
+	 	count(friend_id)
+	FROM friend_tb
+	<where>
+		<if test="accountId!=null">
+			AND account_id=#{accountId}
+		</if>
+		<if test="friendAccountId!=null">
+			AND friend_account_id=#{friendAccountId}
+		</if>
+	</where>
+</select>   
+   
+ 
+</mapper>

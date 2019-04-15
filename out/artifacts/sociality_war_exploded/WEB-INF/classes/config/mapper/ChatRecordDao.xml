@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.nieyue.dao.ChatRecordDao">
+<!-- 添加 -->
+<insert id="add" parameterType="ChatRecord" keyProperty="chatRecordId" flushCache="true"  >
+   INSERT IGNORE INTO
+   		  chat_record_tb
+   		 (
+   		 content,
+   		 create_date,
+   		 update_date,
+   		 account_id,
+   		 to_account_id
+   		 )
+   VALUES
+    	 (
+    	 #{content},
+    	 #{createDate},
+    	 #{updateDate},
+    	 #{accountId},
+    	 #{toAccountId}
+    	 )
+</insert>  
+<!-- 更新 -->
+<update id="update" parameterType="ChatRecord" >
+    UPDATE
+	chat_record_tb
+    <set>
+		<if test="content!=null">
+			content=#{content},
+		</if>
+		<if test="createDate!=null">
+			create_date=#{createDate},
+		</if>
+		<if test="updateDate!=null">
+			update_date=#{updateDate},
+		</if>
+		<if test="accountId!=null">
+			account_id=#{accountId},
+		</if>
+		<if test="toAccountId!=null">
+			to_account_id=#{toAccountId},
+		</if>
+	</set>
+    WHERE
+		chat_record_id=#{chatRecordId}
+</update> 
+<!-- 删除-->
+<delete id="delete"  parameterType="Integer" >
+    DELETE FROM
+    	 chat_record_tb
+    	 WHERE chat_record_id=#{chatRecordId}
+</delete>  
+<!-- 加载-->
+<select id="load" parameterType="Integer" resultType="ChatRecord" >
+SELECT 
+		chat_record_id,
+		content,
+    	create_date,
+    	update_date,
+    	account_id,
+    	to_account_id
+FROM chat_record_tb
+WHERE chat_record_id=#{chatRecordId}
+</select>
+
+<!-- 列表-->
+<select id="list" resultType="ChatRecord">
+        SELECT
+		chat_record_id,
+		content,
+		create_date,
+		update_date,
+		account_id,
+		to_account_id
+	FROM chat_record_tb
+	<where>
+		<if test="accountId!=null">
+			AND account_id=#{accountId}
+		</if>
+		<if test="toAccountId!=null">
+			AND to_account_id=#{toAccountId}
+		</if>
+		AND ${orderName}
+		<if test="orderWay=='asc'">
+		<![CDATA[>=]]>
+		</if>
+		<if test="orderWay=='desc'">
+		  <![CDATA[<= ]]>
+		</if>
+		(SELECT ${orderName} FROM chat_record_tb
+			<where>
+				<if test="accountId!=null">
+					AND account_id=#{accountId}
+				</if>
+				<if test="toAccountId!=null">
+					AND to_account_id=#{toAccountId}
+				</if>
+			</where>
+			ORDER BY
+				${orderName}  ${orderWay}
+			LIMIT #{pageNum}, 1
+		)
+	</where>
+	ORDER BY
+		${orderName}  ${orderWay}
+	LIMIT
+		#{pageSize}
+</select> 
+
+<!-- 数目 -->
+<select id="count"  resultType="int">
+	SELECT
+	 	count(to_account_id)
+	FROM chat_record_tb
+	<where>
+		<if test="accountId!=null">
+			AND account_id=#{accountId}
+		</if>
+		<if test="toAccountId!=null">
+			AND to_account_id=#{toAccountId}
+		</if>
+	</where>
+</select>   
+   
+ 
+</mapper>

@@ -1,0 +1,227 @@
+<div class="right-body">
+<!-- 朋友圈列表选择 -->
+<div style="margin:10px;">
+<label  class="text-danger nieyueText" style="font-size:30px;color:#ccc;">朋友圈列表</label>
+</div>
+<div style="margin:10px;">
+	<button class="btn btn-warning " id="goBack" onclick="business.self.goBack()">返回</button>
+	<button class="btn btn-primary" id="add" onclick="business.self.addClick()">添加朋友圈</button>
+</div>
+<!-- 朋友圈列表选择end -->
+<!-- 朋友圈列表 -->
+		<div style="width:100%" class="tableWrap">
+			<table class="table table-bordered" style="width:100%">
+				<!--表格头-->
+    			<thead>
+					<tr>
+					  <th>序号</th>
+					  <th>朋友圈id</th>
+						<th>内容</th>
+						<th>点赞数</th>
+					  <th>更新时间</th>
+					  <th >操作</th> 
+					</tr>
+    			</thead>
+    			<!--表格主体-->
+    			<tbody id="tableTbody">
+				</tbody>
+			</table>
+		</div>
+<!-- 朋友圈列表end -->
+	<!-- 页面列表end -->
+
+
+<!-- 分页 -->
+<div class="page_div">
+<!--分页条信息 -->
+	<div class="page_label" id="di">
+		<nav aria-label="Page navigation">
+	    	<ul class="pagination">
+		    </ul>
+		</nav>	
+	</div>
+<!--分页文字信息  -->
+	<div class="page_font"></div>
+</div> 
+<!--分页 end -->
+
+<!-- add -->
+<div id="circleAddWrap" style="display:none">
+	<div id="circleAdd" >
+		<label  class="text-danger">※内容</label>
+		<div class=" comment-input-margin">
+			<textarea  class=" comment-input"  id="contentAdd"  placeholder="内容"></textarea>
+		</div>
+		<label  class="text-danger">※点赞数</label>
+		<div class=" comment-input-margin">
+			<input type="text" class=" comment-input"  id="praisePointsAdd"  placeholder="点赞数"/>
+		</div>
+	  <div class=" comment-input-margin" >
+		<button type="button" class="btn btn-primary" id="circleAddSubmit" >确定</button>
+	  </div>
+	</div>
+</div>
+<!-- add end-->
+<!-- update -->
+<div id="circleUpdateWrap" style="display:none">
+	<div id="circleUpdate">
+		<label  class="text-danger">※内容</label>
+		<div class=" comment-input-margin">
+			<textarea  class=" comment-input"  id="contentUpdate"  placeholder="内容"></textarea>
+		</div>
+		<label  class="text-danger">※点赞数</label>
+		<div class=" comment-input-margin">
+			<input type="text" class=" comment-input"  id="praisePointsUpdate"  placeholder="点赞数"/>
+		</div>
+	  <div class=" comment-input-margin" >
+	    <button type="button" class="btn btn-primary" id="circleUpdateSubmit" >确定</button>
+	  </div>
+	</div>
+</div>
+<!-- update end-->
+</div>
+<script>
+    if(business.self.attribute.isFromMenu){
+        $("#goBack").hide();
+        $("#add").hide();
+    }else{
+    }
+
+    //初始化列表
+	business.self.getList=function(callback){
+        if(business.self.attribute.isFromMenu){
+            business.params.accountId=null;//代表所有
+        }else{
+            business.params.accountId=business.self.attribute.accountId;//传递的参数
+        }
+	business.getList({
+       countUrl:'/circle/count',
+       listUrl:'/circle/list',
+       data:'circleList',
+       success:function(){
+       var tableTbody="";
+       for(var i=0;i<business.circleList.length;i++){
+			tableTbody+="<tr>"+
+						  "<td>"+
+						      "<span>"+(i+(business.params.currentPage-1)*business.params.pageSize+business.params.startNum)+"</span>"+
+						  "</td>"+
+						  "<td>"+
+						      "<span>"+business.circleList[i].circleId+"</span>"+
+						  "</td>"+
+						  "<td>"+
+						      "<span>"+business.circleList[i].content+"</span>"+
+						  "</td>"+
+						  "<td>"+
+						      "<span>"+business.circleList[i].praisePoints+"</span>"+
+						  "</td>"+
+						  "<td>"+
+						      "<span>"+business.circleList[i].updateDate+"</span>"+
+						  "</td>"+
+						  "<td>"+
+						      "<button class='btn btn-warning' onclick='business.self.updateClick("+ JSON.stringify(business.circleList[i])+")'>修改</span>"+
+						      "<button class='btn btn-danger' onclick='business.self.deleteClick("+business.circleList[i].circleId+")'>删除</span>"+
+						  "</td>"+
+						"</tr>";
+		}
+		//表格数据
+		$("#tableTbody").html(tableTbody);
+		//回调
+		callback();
+		     }
+     },business.params);
+	}
+	//初始化
+	business.initPage(business.self.getList);
+	/**
+     * 增加
+     * p.addUrl 增加url
+     * p.requestObject 请求参数对象
+     * p.success 成功回调
+     */
+     business.self.addClick=function(){
+     //显示model
+	 business.self.showModel('添加朋友圈','#circleAddWrap','#circleAdd');
+	    $(document).off("click","#circleAddSubmit");
+		$(document).on("click","#circleAddSubmit",function(){
+		    if(!myUtils.userVerification.postNum.test($("#praisePointsAdd").val())){
+		        myUtils.myLoadingToast("点赞数为含零正整数")
+				return;
+			}
+		business.addCircle={
+            accountId:business.params.accountId,
+			content:$("#contentAdd").val(),
+            praisePoints:$("#praisePointsAdd").val(),
+		};
+		business.add({
+			url:'/circle/add',
+			requestObject:'addCircle',
+			success:function(){
+			 $("#closeModal").click();
+			 //初始化
+			business.initPage(business.self.getList);
+			}
+		}); 
+		});
+	}
+	/**
+     * 修改
+     * p.url 修改url
+     * p.requestObject 请求参数对象
+     * p.success 成功回调
+     */
+	business.self.updateClick=function(circle){
+	//显示model
+	 business.self.showModel('修改朋友圈','#circleUpdateWrap','#circleUpdate');
+        $("#contentUpdate").val(circle.content);
+        $("#praisePointsUpdate").val(circle.praisePoints);
+	 //绑定
+	$(document).off("click","#circleUpdateSubmit");
+	$(document).on("click","#circleUpdateSubmit",function(){
+	business.updateCircle=circle;//复制
+	business.updateCircle.content=$("#contentUpdate").val();
+	business.updateCircle.praisePoints=$("#praisePointsUpdate").val();
+        if(!myUtils.userVerification.postNum.test($("#praisePointsUpdate").val())){
+            myUtils.myLoadingToast("点赞数为含零正整数")
+            return;
+        }
+	 business.update({
+      url:"/circle/update",
+      requestObject:'updateCircle',
+      success:function(){
+      $("#closeModal").click();
+      //初始化
+		business.initPage(business.self.getList);
+      }
+      }); 
+	});
+	};
+	/**
+     * 删除
+     * p.url 修改url
+     * p.requestObject 请求参数对象
+     * p.success 成功回调
+     */
+     business.self.deleteClick=function(circleId){
+     business.deleteCircle={
+		circleId:circleId
+	 };
+      business.delete({
+      url:"/circle/delete",
+      requestObject:'deleteCircle',
+      success:function(){
+      //初始化
+	business.initPage(business.self.getList);
+      }
+      })
+     }
+
+    /**
+     **返回用户
+     */
+    business.self.goBack=function(){
+        if(business.self.attribute.accountId){
+            //加载
+            $(".content_main").load(business.domainUrl+"/main/user.html");
+        }
+    }
+</script>

@@ -1,8 +1,11 @@
 package com.nieyue.service.impl;
 
+import com.nieyue.bean.Account;
 import com.nieyue.bean.CircleComment;
 import com.nieyue.dao.CircleCommentDao;
+import com.nieyue.service.AccountService;
 import com.nieyue.service.CircleCommentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +18,8 @@ import java.util.List;
 public class CircleCommentServiceImpl implements CircleCommentService{
 	@Resource
 	CircleCommentDao circleCommentDao;
+	@Autowired
+	AccountService accountService;
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public boolean add(CircleComment circleComment) {
@@ -40,6 +45,10 @@ public class CircleCommentServiceImpl implements CircleCommentService{
 	@Override
 	public CircleComment load(Integer circleCommentId) {
 		CircleComment r = circleCommentDao.load(circleCommentId);
+		if(r!=null){
+			Account account = accountService.load(r.getAccountId());
+			r.setAccount(account);
+		}
 		return r;
 	}
 
@@ -59,6 +68,12 @@ public class CircleCommentServiceImpl implements CircleCommentService{
 			pageSize=0;//没有数据
 		}
 		List<CircleComment> l = circleCommentDao.list(accountId,pageNum-1, pageSize, orderName, orderWay);
+		l.forEach(r->{
+			if(r!=null){
+				Account account = accountService.load(r.getAccountId());
+				r.setAccount(account);
+			}
+		});
 		return l;
 	}
 

@@ -178,6 +178,7 @@
 	$(document).off("click","#circleUpdateSubmit");
 	$(document).on("click","#circleUpdateSubmit",function(){
 	business.updateCircle=circle;//复制
+		delete business.updateCircle.account;
 	business.updateCircle.content=$("#contentUpdate").val();
 	business.updateCircle.praisePoints=$("#praisePointsUpdate").val();
         if(!myUtils.userVerification.postNum.test($("#praisePointsUpdate").val())){

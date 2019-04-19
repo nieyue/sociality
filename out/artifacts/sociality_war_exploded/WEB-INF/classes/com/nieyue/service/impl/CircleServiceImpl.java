@@ -1,8 +1,11 @@
 package com.nieyue.service.impl;
 
+import com.nieyue.bean.Account;
 import com.nieyue.bean.Circle;
 import com.nieyue.dao.CircleDao;
+import com.nieyue.service.AccountService;
 import com.nieyue.service.CircleService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,8 +16,10 @@ import java.util.List;
 
 @Service
 public class CircleServiceImpl implements CircleService{
-	@Resource
+	@Autowired
 	CircleDao circleDao;
+	@Autowired
+	AccountService accountService;
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public boolean add(Circle circle) {
@@ -40,6 +45,10 @@ public class CircleServiceImpl implements CircleService{
 	@Override
 	public Circle load(Integer circleId) {
 		Circle r = circleDao.load(circleId);
+		if(r!=null){
+			Account account = accountService.load(r.getAccountId());
+			r.setAccount(account);
+		}
 		return r;
 	}
 
@@ -59,6 +68,12 @@ public class CircleServiceImpl implements CircleService{
 			pageSize=0;//没有数据
 		}
 		List<Circle> l = circleDao.list(accountId,pageNum-1, pageSize, orderName, orderWay);
+		l.forEach(r->{
+			if(r!=null){
+				Account account = accountService.load(r.getAccountId());
+				r.setAccount(account);
+			}
+		});
 		return l;
 	}
 

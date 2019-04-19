@@ -48,6 +48,20 @@ INDEX INDEX_ACCOUNTID (account_id) USING BTREE,
 INDEX INDEX_FRIENDACCOUNTID (friend_account_id) USING BTREE
 )ENGINE = InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8 COMMENT='好友表';
 
+#创建好友申请表
+CREATE TABLE friend_apply_tb(
+friend_apply_id int(11) NOT NULL AUTO_INCREMENT COMMENT '好友申请id',
+create_date datetime COMMENT '创建时间',
+update_date datetime COMMENT '更新时间',
+account_id int(11) COMMENT '申请人id外键',
+friend_account_id int(11) COMMENT '被申请人id外键',
+status tinyint DEFAULT 0 COMMENT '状态，默认1申请中，2已同意，3已拒绝',
+PRIMARY KEY (friend_apply_id),
+INDEX INDEX_ACCOUNTID (account_id) USING BTREE,
+INDEX INDEX_FRIENDACCOUNTID (friend_account_id) USING BTREE,
+INDEX INDEX_STATUS (status) USING BTREE
+)ENGINE = InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8 COMMENT='好友申请表';
+
 #创建聊天记录表
 CREATE TABLE chat_record_tb(
 chat_record_id int(11) NOT NULL AUTO_INCREMENT COMMENT '聊天记录id',

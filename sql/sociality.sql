@@ -62,19 +62,6 @@ INDEX INDEX_FRIENDACCOUNTID (friend_account_id) USING BTREE,
 INDEX INDEX_STATUS (status) USING BTREE
 )ENGINE = InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8 COMMENT='好友申请表';
 
-#创建聊天记录表
-CREATE TABLE chat_record_tb(
-chat_record_id int(11) NOT NULL AUTO_INCREMENT COMMENT '聊天记录id',
-content longtext COMMENT '内容',
-create_date datetime COMMENT '创建时间',
-update_date datetime COMMENT '更新时间',
-account_id int(11) COMMENT '账户id外键',
-to_account_id int(11) COMMENT '接收方账户id外键',
-PRIMARY KEY (chat_record_id),
-INDEX INDEX_ACCOUNTID (account_id) USING BTREE,
-INDEX INDEX_TOACCOUNTID (to_account_id) USING BTREE
-)ENGINE = InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8 COMMENT='聊天记录表';
-
 #创建朋友圈表
 CREATE TABLE circle_tb(
 circle_id int(11) NOT NULL AUTO_INCREMENT COMMENT '朋友圈id',
@@ -101,7 +88,7 @@ INDEX INDEX_ACCOUNTID (account_id) USING BTREE
 #创建聊天房表
 CREATE TABLE chat_room_tb(
 chat_room_id int(11) NOT NULL AUTO_INCREMENT COMMENT '聊天房id',
-type tinyint(4) COMMENT '类型，1语音房，2电影房',
+type tinyint(4) COMMENT '类型，1普通房，2语音房，3电影房',
 name varchar(255) COMMENT '名称',
 url varchar(255) COMMENT '语音或电影url',
 create_date datetime COMMENT '创建时间',
@@ -110,6 +97,18 @@ account_id int(11) COMMENT '创建人id外键',
 PRIMARY KEY (chat_room_id),
 INDEX INDEX_ACCOUNTID (account_id) USING BTREE
 )ENGINE = InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8 COMMENT='聊天房表';
+
+#创建聊天房成员表
+CREATE TABLE chat_room_member_tb(
+chat_room_member_id int(11) NOT NULL AUTO_INCREMENT COMMENT '聊天房成员id',
+create_date datetime COMMENT '创建时间',
+update_date datetime COMMENT '更新时间',
+chat_room_id int(11) COMMENT '聊天房id外键',
+account_id int(11) COMMENT '账户id外键',
+PRIMARY KEY (chat_room_member_id),
+INDEX INDEX_CHATROOMID (chat_room_id) USING BTREE,
+INDEX INDEX_ACCOUNTID (account_id) USING BTREE
+)ENGINE = InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8 COMMENT='聊天房成员表';
 
 #创建聊天房聊天记录表
 CREATE TABLE chat_room_record_tb(

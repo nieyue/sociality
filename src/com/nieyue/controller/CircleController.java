@@ -81,6 +81,9 @@ public class CircleController {
 	@ApiOperation(value = "朋友圈增加", notes = "朋友圈增加")
 	@RequestMapping(value = "/add", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Circle>> add(@ModelAttribute Circle circle, HttpSession session) {
+		if(circle.getPraisePoints()==null){
+			circle.setPraisePoints(0);
+		}
 		boolean am = circleService.add(circle);
 		if(am){
 			List<Circle> list = new ArrayList<>();

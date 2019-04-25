@@ -1,20 +1,24 @@
 package com.nieyue.service.impl;
 
+import com.nieyue.bean.Account;
 import com.nieyue.bean.FriendApply;
 import com.nieyue.dao.FriendApplyDao;
+import com.nieyue.service.AccountService;
 import com.nieyue.service.FriendApplyService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public class FriendApplyServiceImpl implements FriendApplyService{
-	@Resource
+	@Autowired
 	FriendApplyDao friendApplyDao;
+	@Autowired
+	AccountService accountService;
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public boolean add(FriendApply friendApply) {
@@ -40,6 +44,10 @@ public class FriendApplyServiceImpl implements FriendApplyService{
 	@Override
 	public FriendApply load(Integer friendApplyId) {
 		FriendApply r = friendApplyDao.load(friendApplyId);
+		if(r!=null){
+			Account account = accountService.load(r.getAccountId());
+			r.setAccount(account);
+		}
 		return r;
 	}
 
@@ -59,6 +67,12 @@ public class FriendApplyServiceImpl implements FriendApplyService{
 			pageSize=0;//没有数据
 		}
 		List<FriendApply> l = friendApplyDao.list(accountId,friendAccountId,status,pageNum-1, pageSize, orderName, orderWay);
+		l.forEach(r->{
+			if(r!=null){
+				Account account = accountService.load(r.getAccountId());
+				r.setAccount(account);
+			}
+		});
 		return l;
 	}
 

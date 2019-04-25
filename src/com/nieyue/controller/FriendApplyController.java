@@ -1,20 +1,23 @@
 package com.nieyue.controller;
 
+import com.nieyue.bean.Friend;
 import com.nieyue.bean.FriendApply;
 import com.nieyue.exception.NotAnymoreException;
 import com.nieyue.exception.NotIsNotExistException;
 import com.nieyue.service.FriendApplyService;
+import com.nieyue.service.FriendService;
 import com.nieyue.util.ResultUtil;
 import com.nieyue.util.StateResultList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -27,9 +30,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/friendApply")
 public class FriendApplyController {
-	@Resource
+	@Autowired
 	private FriendApplyService friendApplyService;
-	
+	@Autowired
+	private FriendService friendService;
+
 	/**
 	 * 好友申请分页浏览
 	 * @param orderName 商品排序数据库字段
@@ -87,6 +92,115 @@ public class FriendApplyController {
 	public @ResponseBody StateResultList<List<FriendApply>> add(@ModelAttribute FriendApply friendApply, HttpSession session) {
 		boolean am = friendApplyService.add(friendApply);
 		if(am){
+			List<FriendApply> list = new ArrayList<>();
+			list.add(friendApply);
+			return ResultUtil.getSlefSRSuccessList(list);
+		}
+		return ResultUtil.getSlefSRFailList(null);
+	}
+	/**
+	 * 好友申请
+	 * @return
+	 */
+	@ApiOperation(value = "好友申请", notes = "好友申请")
+	@RequestMapping(value = "/apply", method = {RequestMethod.GET,RequestMethod.POST})
+	public @ResponseBody StateResultList<List<FriendApply>> apply(@ModelAttribute FriendApply friendApply, HttpSession session) {
+		if(friendApply.getAccountId().equals(friendApply.getFriendAccountId())){
+			return ResultUtil.getSlefSRList(40004,"自己不能加自己",null);
+		}
+		List<FriendApply> friendApplyList = friendApplyService.list(friendApply.getAccountId(), friendApply.getFriendAccountId(), 1, 1, Integer.MAX_VALUE, "friend_apply_id", "desc");
+		if(friendApplyList.size()>0){
+			return ResultUtil.getSlefSRList(40005,"已经申请过了",null);
+		}else {
+			//判断是否好友
+			List<Friend> friendList = friendService.list(friendApply.getAccountId(), friendApply.getFriendAccountId(),  1, Integer.MAX_VALUE, "friend_id", "desc");
+			if(friendList.size()>0){
+				return ResultUtil.getSlefSRList(40006,"已经是好友了",null);
+			}
+		}
+		//如果对方已经申请过了，直接添加成功
+		List<FriendApply> fal = friendApplyService.list(friendApply.getFriendAccountId(), friendApply.getAccountId(), 1, 1, Integer.MAX_VALUE, "friend_apply_id", "desc");
+			if(fal.size()>0){
+				FriendApply fa = fal.get(0);
+				fa.setStatus(2);
+				boolean b = friendApplyService.update(fa);
+				if(b){
+					//相互好友添加
+					Friend friend=new Friend();
+					friend.setCreateDate(new Date());
+					friend.setUpdateDate(new Date());
+					friend.setAccountId(fa.getAccountId());
+					friend.setFriendAccountId(fa.getFriendAccountId());
+					friendService.add(friend);
+
+					Friend friend2=new Friend();
+					friend2.setCreateDate(new Date());
+					friend2.setUpdateDate(new Date());
+					friend2.setFriendAccountId(fa.getAccountId());
+					friend2.setAccountId(fa.getFriendAccountId());
+					friendService.add(friend2);
+					List<FriendApply> list = new ArrayList<>();
+					list.add(fa);
+					return ResultUtil.getSlefSRSuccessList(list);
+				}
+			}
+		//首次申请的
+		friendApply.setStatus(1);//状态，默认1申请中，2已同意，3已拒绝
+		boolean am = friendApplyService.add(friendApply);
+		if(am){
+			List<FriendApply> list = new ArrayList<>();
+			list.add(friendApply);
+			return ResultUtil.getSlefSRSuccessList(list);
+		}
+		return ResultUtil.getSlefSRFailList(null);
+	}
+	/**
+	 * 同意/拒绝添加好友
+	 * @return
+	 */
+	@ApiOperation(value = "同意/拒绝添加好友", notes = "同意/拒绝添加好友")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name="friendApplyId",value="好友申请ID",dataType="int", paramType = "query",required=true),
+			@ApiImplicitParam(name="status",value="状态，默认1申请中，2已同意，3已拒绝",dataType="int", paramType = "query",required=true)
+	})
+	@RequestMapping(value = "/agreeOrRefuse", method = {RequestMethod.GET,RequestMethod.POST})
+	public @ResponseBody StateResultList<List<FriendApply>> agreeOrRefuse(
+			@RequestParam(value="friendApplyId",required=false)Integer friendApplyId,
+			@RequestParam(value="status",required=false)Integer status,
+			HttpSession session) {
+		FriendApply friendApply=friendApplyService.load(friendApplyId);
+		if(friendApply==null){
+			return ResultUtil.getSlefSRList(4,"没有好友申请",null);
+		}
+		if(friendApply.getStatus()==2){
+			return ResultUtil.getSlefSRList(40006,"已经是好友了",null);
+		}
+		if(friendApply.getStatus()==3){
+			return ResultUtil.getSlefSRList(40007,"已经拒绝了",null);
+		}
+		if(status==null||(status!=2&&status!=3)){
+			return ResultUtil.getSlefSRList(4,"操作错误",null);
+		}
+		friendApply.setStatus(status);//状态，默认1申请中，2已同意，3已拒绝
+		boolean am = friendApplyService.update(friendApply);
+		if(am){
+			if(status==2){
+				//相互好友添加
+				Friend friend=new Friend();
+				friend.setCreateDate(new Date());
+				friend.setUpdateDate(new Date());
+				friend.setAccountId(friendApply.getAccountId());
+				friend.setFriendAccountId(friendApply.getFriendAccountId());
+				friendService.add(friend);
+
+				Friend friend2=new Friend();
+				friend2.setCreateDate(new Date());
+				friend2.setUpdateDate(new Date());
+				friend2.setFriendAccountId(friendApply.getAccountId());
+				friend2.setAccountId(friendApply.getFriendAccountId());
+				friendService.add(friend2);
+
+			}
 			List<FriendApply> list = new ArrayList<>();
 			list.add(friendApply);
 			return ResultUtil.getSlefSRSuccessList(list);

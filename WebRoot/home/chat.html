@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Cache" content="no-cache">
+    <meta name="viewport"
+          content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+    <title>好友信息</title>
+    <link href="resources/css/font-awesome.min.css" rel="stylesheet">
+    <link href="resources/css/datetime.css" rel="stylesheet">
+    <link rel="stylesheet" href="resources/css/base.css">
+    <style>
+        .common-wrap{
+            box-sizing: border-box;
+            background-color:#fff;
+            padding:50px 2% 50px 2%;
+            margin:auto;
+            height:100%;
+            width:750px;
+            text-align:center;
+            position:relative;
+            left:0;
+            top:0;
+        }
+        @media screen and (max-width:750px){
+            .common-wrap{
+                width:100%;
+            }
+        }
+        .user-wrap-item{
+            margin:20px auto;
+        }
+        /**
+        *高度自适应
+         */
+        .textarea{
+            text-align: left;
+            padding-left:12px;
+            min-height: 32px;
+            max-height: 300px;
+            _height: 120px;
+            margin-left: auto;
+            margin-right: auto;
+            outline: 0;
+            border: 1px solid #a0b3d6;
+            font-size: 12px;
+            line-height: 32px;
+            word-wrap: break-word;
+            overflow-x: hidden;
+            overflow-y: auto;
+
+            border-color: rgba(82, 168, 236, 0.8);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(82, 168, 236, 0.6);
+        }
+    </style>
+</head>
+<body>
+<div class="nav-wrap">
+     <span style="cursor:pointer;position:absolute;left:10px;top:0;" onclick="business.gonav('index')">
+            社交网络
+        </span>
+    <span class="nologin" style="display:none;cursor:pointer;position:absolute;right:68px;top:4px;color:#fff;background-color:red;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gologin()">登陆</span>
+    <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:188px;top:4px;color:#fff;background-color:#2732ff;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('friend',true)">好友</span>
+    <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:118px;top:4px;color:#fff;background-color:#9fff2d;width:58px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('circle',true)">时光圈</span>
+    <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:68px;top:4px;color:#fff;background-color:#c51fff;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('user',true)">我的</span>
+    <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:22px;top:4px;color:#000;background-color:#ececec;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.loginout()">登出</span>
+</div>
+<div class="common-wrap"style="padding:38px 0 0 0;">
+    <div style="background-color:#f8f8f8f8;position:absolute;top:38px;left:0;width:100%;border-bottom:1px solid #ccc;height:38px;z-index:10;">
+        <span style="cursor:pointer;float:left;margin-top:8px;" onclick="business.goback()"><</span>
+        <span id="name" style="display:inline-block;margin-top:8px;">名称</span>
+    </div>
+
+    <div style="background-color:#f8f8f8f8;width:100%;height:100%;position:absolute;top:0;left:0;box-sizing: border-box;padding:76px 0 38px 0;z-index:9; ">
+       <div>
+
+       </div>
+    </div>
+
+    <div style="position:absolute;bottom:0;left:0;width:100%;min-height:38px;height:auto;border-top:1px solid #ccc;z-index:10;">
+        <div style="width:calc(100% - 92px);min-height:32px;height:auto;display: inline-block;margin-top:6px;">
+            <div class="textarea" id="content" contenteditable="true"></div>
+        </div>
+        <span onclick="business.sendMessage()" style="vertical-align:top;display: inline-block;cursor:pointer;height:32px;width:72px;background-color:#2732ff;color:#fff;line-height: 32px;border-radius:3px;margin-top:6px;">发送</span>
+    </div>
+</div>
+
+
+<script src="resources/js/jquery1.12.2.js"></script>
+<script src="resources/js/socket.js"></script>
+<script src="resources/js/datetime.js"></script>
+<script src="resources/js/base.js"></script>
+<script>
+    //socket
+        var wsPath=wsPath();
+        function wsPath(){
+            var local=window.location;
+            //var contextPath=local.pathname.split("/")[1];
+            return "ws://"+local.host+"/";
+        };
+
+        //建立socket连接
+        var sock;
+        var lockReconnect = false,count=0;
+        createWebSocket();
+
+
+        function createWebSocket(){
+            try {
+                if ('WebSocket' in window) {
+                    sock = new WebSocket(wsPath+"ws");
+                } else if ('MozWebSocket' in window) {
+                    sock = new MozWebSocket(wsPath+"ws");
+                } else {
+                    sock = new SockJS(wsPath+"ws/sockjs");
+                }
+                init();
+            } catch (e) {
+                console.log('Ceate WebSocket Error ! Tring To RestConnection !'+e);
+                restConnect();
+            }
+
+        }
+
+        function init(){
+            sock.onopen = function (e) {
+                heartCheck.start();
+                console.info(" WebSocket Connection Success ! ");
+            };
+            sock.onmessage = function (e) {
+                heartCheck.reset();
+                if(e.data==""){
+                    return false;
+                }
+                var socketMSG=JSON.parse(e.data);
+                //socketMSG.MSG 我这里后端传的是个json 所以这么写的
+                console.log("socketMSG")
+                console.log(socketMSG)
+                if(socketMSG.MSG!=undefined){
+                    //e.data是获取后端传送的消息，我这里的操作时把信息拿出来放到消息栏并提示， 这里根据自己的需求修改吧。
+                }
+            };
+            sock.onerror = function (e) {
+                console.error(" WebSocket Connection Failure ! Tring To RestConnect !"+e);
+                restConnect();
+            };
+            sock.onclose = function (e) {
+                console.warn(" WebSocket Connection Close ! Tring To RestConnect !"+e);
+                restConnect();
+            }
+        }
+
+
+        function restConnect(){
+            if(lockReconnect){
+                return;
+            }
+            if(count<=3){
+                createWebSocket();
+                lockReconnect=true;
+            }else{
+                console.error('WebSocket Connection Timeout!');
+            }
+        }
+
+        var heartCheck = {
+            timeout: 300000,//5分钟
+            timeoutObj: null,
+            serverTimeoutObj: null,
+            reset: function(){
+                clearTimeout(this.timeoutObj);
+                clearTimeout(this.serverTimeoutObj);
+                console.log(" reset-start")
+                this.start();
+            },
+            start: function(){
+                var _this = this;
+                this.timeoutObj = setTimeout(function(){
+                    sock.send("");
+                    _this.serverTimeoutObj = setTimeout(function(){
+                        console.log(" start-sock ..close")
+                        sock.close();
+                    }, _this.timeout)
+                }, this.timeout)
+            }
+        };
+
+
+        //窗口关闭前,主动关闭websocket连接
+        window.onbeforeunload = function () {
+            console.log("onbeforeunload-sock ..close")
+            sock.close();
+        };
+
+
+    if(!localStorage.getItem("account")||!business.getQueryString("chatRoomId")){
+        business.gologin()
+    }
+    //初始化
+    business.ajax({
+        url:'/chatRoom/load',
+        data:{
+            chatRoomId:business.getQueryString("chatRoomId"),
+        },
+        success:function(d){
+            var chatRoom=d.data[0];
+            business.ajax({
+                url:'/chatRoomMember/list',
+                data:{
+                    chatRoomId:business.getQueryString("chatRoomId"),
+                },
+                success:function(data){
+                    var chatRoomMemberList=data.data;
+                    if(chatRoomMemberList.length==1){
+                        business.myLoadingToast("不能和自己聊天")
+                        return;
+                    }
+                    if(chatRoomMemberList.length>2){
+                        $("#name").text(chatRoom.name)
+                    }else{
+                        for (var i = 0; i < chatRoomMemberList.length; i++) {
+                            var chatRoomMember=chatRoomMemberList[i];
+                            if(chatRoomMember.accountId!=JSON.parse(localStorage.getItem("account")).accountId){
+                                $("#name").text(chatRoomMember.account.realname)
+                            }
+                        }
+                    }
+                    console.log(chatRoomMemberList)
+                },
+                fail:function(data){
+                    business.myLoadingToast(data.msg)
+                }
+            })
+        },
+        fail:function(data){
+            business.myLoadingToast(data.msg)
+        }
+    })
+    //发送消息
+    business.sendMessage=function(){
+        var content=$("#content").html();
+        if(!content||content.length<=0){
+            return;
+        }
+        var message={
+            "accountId":JSON.parse(localStorage.getItem("account")).accountId,
+            "chatRoomId":business.getQueryString("chatRoomId"),
+            "content":content
+        };
+        sock.send(JSON.stringify(message))
+        return ;
+        business.ajax({
+            url:'/chatRoom/sendMessage',
+            data:{
+                chatRoomId:business.getQueryString("chatRoomId"),
+                content:content
+            },
+            success:function(data){
+                var chatRoomMemberList=data.data;
+                if(chatRoomMemberList.length==1){
+                    business.myLoadingToast("不能和自己聊天")
+                    return;
+                }
+                if(chatRoomMemberList.length>2){
+                    $("#name").text(chatRoom.name)
+                }else{
+                    for (var i = 0; i < chatRoomMemberList.length; i++) {
+                        var chatRoomMember=chatRoomMemberList[i];
+                        if(chatRoomMember.accountId!=JSON.parse(localStorage.getItem("account")).accountId){
+                            $("#name").text(chatRoomMember.account.realname)
+                        }
+                    }
+                }
+                console.log(chatRoomMemberList)
+                $("#chatContent").html("");
+            },
+            fail:function(data){
+                business.myLoadingToast(data.msg)
+                $("#chatContent").html("");
+            }
+        })
+    }
+</script>
+</body>
+</html>

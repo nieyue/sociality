@@ -80,8 +80,8 @@ WHERE friend_apply_id=#{friendApplyId}
 		<if test="accountId!=null">
 			AND account_id=#{accountId}
 		</if>
-		<if test="friendApplyId!=null">
-			AND friend_apply_id=#{friendApplyId}
+		<if test="friendAccountId!=null">
+			AND friend_account_id=#{friendAccountId}
 		</if>
 		<if test="status!=null">
 			AND status=#{status}
@@ -98,8 +98,8 @@ WHERE friend_apply_id=#{friendApplyId}
 				<if test="accountId!=null">
 					AND account_id=#{accountId}
 				</if>
-				<if test="friendApplyId!=null">
-					AND friend_apply_id=#{friendApplyId}
+				<if test="friendAccountId!=null">
+					AND friend_account_id=#{friendAccountId}
 				</if>
 				<if test="status!=null">
 					AND status=#{status}
@@ -125,8 +125,8 @@ WHERE friend_apply_id=#{friendApplyId}
 		<if test="accountId!=null">
 			AND account_id=#{accountId}
 		</if>
-		<if test="friendApplyId!=null">
-			AND friend_apply_id=#{friendApplyId}
+		<if test="friendAccountId!=null">
+			AND friend_account_id=#{friendAccountId}
 		</if>
 		<if test="status!=null">
 			AND status=#{status}

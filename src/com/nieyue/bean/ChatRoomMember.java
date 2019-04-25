@@ -7,20 +7,20 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 好友申请
+ * 聊天房成员
  *
  */
-@ApiModel(value="好友申请",description="好友申请")
-public class FriendApply implements Serializable{
+@ApiModel(value="聊天房成员",description="聊天房成员")
+public class ChatRoomMember implements Serializable{
     /**
      *
      */
     private static final long serialVersionUID = 1L;
     /**
-     * 好友申请id
+     * 聊天房成员id
      */
-    @ApiModelProperty(value="好友申请id")
-    private Integer friendApplyId;
+    @ApiModelProperty(value="聊天房成员id")
+    private Integer chatRoomMemberId;
     /**
      * 创建时间
      */
@@ -29,34 +29,29 @@ public class FriendApply implements Serializable{
     /**
      * 更新时间
      */
-    @ApiModelProperty(value="好友申请更新时间")
+    @ApiModelProperty(value="聊天房成员更新时间")
     private Date updateDate;
     /**
-     * 申请人id外键
+     * 聊天房id外键
      */
-    @ApiModelProperty(value="申请人id外键")
+    @ApiModelProperty(value="聊天房id外键")
+    private Integer chatRoomId;
+    /**
+     * 账户id外键
+     */
+    @ApiModelProperty(value="账户id外键")
     private Integer accountId;
     /**
-     * 申请人
+     * 账户
      */
-    @ApiModelProperty(value="申请人")
+    @ApiModelProperty(value="账户")
     private Account account;
-    /**
-     * 被申请人id外键
-     */
-    @ApiModelProperty(value="被申请人id外键")
-    private Integer friendAccountId;
-    /**
-     * 状态，默认1申请中，2已同意，3已拒绝
-     */
-    @ApiModelProperty(value="状态，默认1申请中，2已同意，3已拒绝")
-    private Integer status;
 
-    public FriendApply() {
+    public ChatRoomMember() {
     }
 
-    public Integer getFriendApplyId() {
-        return this.friendApplyId;
+    public Integer getChatRoomMemberId() {
+        return this.chatRoomMemberId;
     }
 
     public Date getCreateDate() {
@@ -67,6 +62,10 @@ public class FriendApply implements Serializable{
         return this.updateDate;
     }
 
+    public Integer getChatRoomId() {
+        return this.chatRoomId;
+    }
+
     public Integer getAccountId() {
         return this.accountId;
     }
@@ -75,16 +74,8 @@ public class FriendApply implements Serializable{
         return this.account;
     }
 
-    public Integer getFriendAccountId() {
-        return this.friendAccountId;
-    }
-
-    public Integer getStatus() {
-        return this.status;
-    }
-
-    public void setFriendApplyId(Integer friendApplyId) {
-        this.friendApplyId = friendApplyId;
+    public void setChatRoomMemberId(Integer chatRoomMemberId) {
+        this.chatRoomMemberId = chatRoomMemberId;
     }
 
     public void setCreateDate(Date createDate) {
@@ -95,6 +86,10 @@ public class FriendApply implements Serializable{
         this.updateDate = updateDate;
     }
 
+    public void setChatRoomId(Integer chatRoomId) {
+        this.chatRoomId = chatRoomId;
+    }
+
     public void setAccountId(Integer accountId) {
         this.accountId = accountId;
     }
@@ -103,22 +98,14 @@ public class FriendApply implements Serializable{
         this.account = account;
     }
 
-    public void setFriendAccountId(Integer friendAccountId) {
-        this.friendAccountId = friendAccountId;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof FriendApply)) return false;
-        final FriendApply other = (FriendApply) o;
+        if (!(o instanceof ChatRoomMember)) return false;
+        final ChatRoomMember other = (ChatRoomMember) o;
         if (!other.canEqual((Object) this)) return false;
-        final Object this$friendApplyId = this.getFriendApplyId();
-        final Object other$friendApplyId = other.getFriendApplyId();
-        if (this$friendApplyId == null ? other$friendApplyId != null : !this$friendApplyId.equals(other$friendApplyId))
+        final Object this$chatRoomMemberId = this.getChatRoomMemberId();
+        final Object other$chatRoomMemberId = other.getChatRoomMemberId();
+        if (this$chatRoomMemberId == null ? other$chatRoomMemberId != null : !this$chatRoomMemberId.equals(other$chatRoomMemberId))
             return false;
         final Object this$createDate = this.getCreateDate();
         final Object other$createDate = other.getCreateDate();
@@ -128,48 +115,43 @@ public class FriendApply implements Serializable{
         final Object other$updateDate = other.getUpdateDate();
         if (this$updateDate == null ? other$updateDate != null : !this$updateDate.equals(other$updateDate))
             return false;
+        final Object this$chatRoomId = this.getChatRoomId();
+        final Object other$chatRoomId = other.getChatRoomId();
+        if (this$chatRoomId == null ? other$chatRoomId != null : !this$chatRoomId.equals(other$chatRoomId))
+            return false;
         final Object this$accountId = this.getAccountId();
         final Object other$accountId = other.getAccountId();
         if (this$accountId == null ? other$accountId != null : !this$accountId.equals(other$accountId)) return false;
         final Object this$account = this.getAccount();
         final Object other$account = other.getAccount();
         if (this$account == null ? other$account != null : !this$account.equals(other$account)) return false;
-        final Object this$friendAccountId = this.getFriendAccountId();
-        final Object other$friendAccountId = other.getFriendAccountId();
-        if (this$friendAccountId == null ? other$friendAccountId != null : !this$friendAccountId.equals(other$friendAccountId))
-            return false;
-        final Object this$status = this.getStatus();
-        final Object other$status = other.getStatus();
-        if (this$status == null ? other$status != null : !this$status.equals(other$status)) return false;
         return true;
     }
 
     public int hashCode() {
         final int PRIME = 59;
         int result = 1;
-        final Object $friendApplyId = this.getFriendApplyId();
-        result = result * PRIME + ($friendApplyId == null ? 43 : $friendApplyId.hashCode());
+        final Object $chatRoomMemberId = this.getChatRoomMemberId();
+        result = result * PRIME + ($chatRoomMemberId == null ? 43 : $chatRoomMemberId.hashCode());
         final Object $createDate = this.getCreateDate();
         result = result * PRIME + ($createDate == null ? 43 : $createDate.hashCode());
         final Object $updateDate = this.getUpdateDate();
         result = result * PRIME + ($updateDate == null ? 43 : $updateDate.hashCode());
+        final Object $chatRoomId = this.getChatRoomId();
+        result = result * PRIME + ($chatRoomId == null ? 43 : $chatRoomId.hashCode());
         final Object $accountId = this.getAccountId();
         result = result * PRIME + ($accountId == null ? 43 : $accountId.hashCode());
         final Object $account = this.getAccount();
         result = result * PRIME + ($account == null ? 43 : $account.hashCode());
-        final Object $friendAccountId = this.getFriendAccountId();
-        result = result * PRIME + ($friendAccountId == null ? 43 : $friendAccountId.hashCode());
-        final Object $status = this.getStatus();
-        result = result * PRIME + ($status == null ? 43 : $status.hashCode());
         return result;
     }
 
     protected boolean canEqual(Object other) {
-        return other instanceof FriendApply;
+        return other instanceof ChatRoomMember;
     }
 
     public String toString() {
-        return "FriendApply(friendApplyId=" + this.getFriendApplyId() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", accountId=" + this.getAccountId() + ", account=" + this.getAccount() + ", friendAccountId=" + this.getFriendAccountId() + ", status=" + this.getStatus() + ")";
+        return "ChatRoomMember(chatRoomMemberId=" + this.getChatRoomMemberId() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", chatRoomId=" + this.getChatRoomId() + ", accountId=" + this.getAccountId() + ", account=" + this.getAccount() + ")";
     }
 }
 

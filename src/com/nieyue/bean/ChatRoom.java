@@ -24,7 +24,7 @@ public class ChatRoom implements Serializable{
     /**
      * 类型，1语音房，2电影房
      */
-    @ApiModelProperty(value="类型，1语音房，2电影房")
+    @ApiModelProperty(value="类型，1普通房，2语音房，3电影房")
     private Integer type;
     /**
      * 名称

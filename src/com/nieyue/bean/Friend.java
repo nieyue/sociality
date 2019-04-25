@@ -41,6 +41,11 @@ public class Friend implements Serializable{
      */
     @ApiModelProperty(value="好友id外键")
     private Integer friendAccountId;
+    /**
+     * 好友
+     */
+    @ApiModelProperty(value="好友")
+    private Account friendAccount;
 
     public Friend() {
     }
@@ -65,6 +70,10 @@ public class Friend implements Serializable{
         return this.friendAccountId;
     }
 
+    public Account getFriendAccount() {
+        return this.friendAccount;
+    }
+
     public void setFriendId(Integer friendId) {
         this.friendId = friendId;
     }
@@ -83,6 +92,10 @@ public class Friend implements Serializable{
 
     public void setFriendAccountId(Integer friendAccountId) {
         this.friendAccountId = friendAccountId;
+    }
+
+    public void setFriendAccount(Account friendAccount) {
+        this.friendAccount = friendAccount;
     }
 
     public boolean equals(Object o) {
@@ -108,6 +121,10 @@ public class Friend implements Serializable{
         final Object other$friendAccountId = other.getFriendAccountId();
         if (this$friendAccountId == null ? other$friendAccountId != null : !this$friendAccountId.equals(other$friendAccountId))
             return false;
+        final Object this$friendAccount = this.getFriendAccount();
+        final Object other$friendAccount = other.getFriendAccount();
+        if (this$friendAccount == null ? other$friendAccount != null : !this$friendAccount.equals(other$friendAccount))
+            return false;
         return true;
     }
 
@@ -124,6 +141,8 @@ public class Friend implements Serializable{
         result = result * PRIME + ($accountId == null ? 43 : $accountId.hashCode());
         final Object $friendAccountId = this.getFriendAccountId();
         result = result * PRIME + ($friendAccountId == null ? 43 : $friendAccountId.hashCode());
+        final Object $friendAccount = this.getFriendAccount();
+        result = result * PRIME + ($friendAccount == null ? 43 : $friendAccount.hashCode());
         return result;
     }
 
@@ -132,7 +151,7 @@ public class Friend implements Serializable{
     }
 
     public String toString() {
-        return "Friend(friendId=" + this.getFriendId() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", accountId=" + this.getAccountId() + ", friendAccountId=" + this.getFriendAccountId() + ")";
+        return "Friend(friendId=" + this.getFriendId() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", accountId=" + this.getAccountId() + ", friendAccountId=" + this.getFriendAccountId() + ", friendAccount=" + this.getFriendAccount() + ")";
     }
 }
 

@@ -1,20 +1,24 @@
 package com.nieyue.service.impl;
 
+import com.nieyue.bean.Account;
 import com.nieyue.bean.Friend;
 import com.nieyue.dao.FriendDao;
+import com.nieyue.service.AccountService;
 import com.nieyue.service.FriendService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public class FriendServiceImpl implements FriendService{
-	@Resource
+	@Autowired
 	FriendDao friendDao;
+	@Autowired
+	AccountService accountService;
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public boolean add(Friend friend) {
@@ -40,6 +44,10 @@ public class FriendServiceImpl implements FriendService{
 	@Override
 	public Friend load(Integer friendId) {
 		Friend r = friendDao.load(friendId);
+		if(r!=null){
+			Account account = accountService.load(r.getFriendAccountId());
+			r.setFriendAccount(account);
+		}
 		return r;
 	}
 
@@ -59,6 +67,12 @@ public class FriendServiceImpl implements FriendService{
 			pageSize=0;//没有数据
 		}
 		List<Friend> l = friendDao.list(accountId,friendAccountId,pageNum-1, pageSize, orderName, orderWay);
+		l.forEach(r->{
+			if(r!=null){
+				Account account = accountService.load(r.getFriendAccountId());
+				r.setFriendAccount(account);
+			}
+		});
 		return l;
 	}
 

@@ -8,7 +8,7 @@
     <meta http-equiv="Cache" content="no-cache">
     <meta name="viewport"
           content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
-    <title>我的</title>
+    <title>好友信息</title>
     <link href="resources/css/font-awesome.min.css" rel="stylesheet">
     <link href="resources/css/datetime.css" rel="stylesheet">
     <link rel="stylesheet" href="resources/css/base.css">
@@ -28,7 +28,7 @@
             }
         }
         .user-wrap-item{
-            margin:20px 0;
+            margin:20px auto;
         }
     </style>
 </head>
@@ -45,6 +45,9 @@
 </div>
 <div class="user-wrap">
     <div>
+        <span style="cursor:pointer;float:left;" onclick="business.goback()"><</span>
+    </div>
+    <div>
         用户信息
     </div>
     <div  class="user-wrap-item">
@@ -56,20 +59,20 @@
         <span id="sid"></span>
     </div>
     <div class="user-wrap-item">
-        <span>姓名</span>
-        <input type="text"  style="height:30px;width:200px;" id="realname"/>
+        <span>姓名:</span>
+        <span  style="height:30px;width:200px;" id="realname"></span>
     </div>
     <div class="user-wrap-item" >
-        <span>生日</span>
-        <input type="text"  style="height:30px;width:200px;" id="birthDate"/>
+        <span>生日:</span>
+        <span  style="height:30px;width:200px;" id="birthDate"></span>
     </div>
     <div class="user-wrap-item">
-        <span>性别</span>
-        <select id="sex" style="height:30px;width:200px;">
-        </select>
+        <span>性别:</span>
+        <span id="sex"></span>
     </div>
     <div  style="text-align: center;">
-        <span style="cursor:pointer;background-color: red;border:5px;height: 38px;display: inline-block;color:#fff;width:118px;line-height: 38px;" id="userSubmit">保存</span>
+        <span style="cursor:pointer;background-color: blue;border:5px;height: 38px;display: inline-block;color:#fff;width:118px;line-height: 38px;" onclick="business.chat()">发消息</span>
+        <span style="cursor:pointer;background-color: red;border:5px;height: 38px;display: inline-block;color:#fff;width:118px;line-height: 38px;" onclick="business.deleteFriend()">删除好友</span>
     </div>
 </div>
 
@@ -78,94 +81,81 @@
 <script src="resources/js/datetime.js"></script>
 <script src="resources/js/base.js"></script>
 <script>
-    var account;
-    if(!localStorage.getItem("account")){
+    if(!localStorage.getItem("account")||!business.getQueryString("friendAccountId")){
         business.gologin()
-    }else{
-        account=JSON.parse(localStorage.getItem("account"));
     }
-    $('#birthDate').mdater();
     //初始化
-    business.self.sexList=[
-        {id:0,value:'未知'},
-        {id:1,value:'男'},
-        {id:2,value:'女'}
-    ];
-    $("#sid").text(account.sid);
-    $("#realname").val(account.realname);
-    $("#birthDate").val(account.birthDate.substring(0,10));
-    if(account.icon){
-        $("#icon").attr("src",account.icon);
-    }
-    var sexSelect="";
-    for(var i=0;i<business.self.sexList.length;i++){
-        sexSelect+="<option  value="+business.self.sexList[i].id+">"+business.self.sexList[i].value+"</option>";
-    }
-    $("#sex").html(sexSelect);
-    business.self.sexList.forEach(function(elt, i, array) {
-        if(elt.id==account.sex){
-            $("#sex").find("option[value = '"+elt.id+"']").attr("selected","selected");
+    business.ajax({
+        url:'/account/load',
+        data:{
+            accountId:business.getQueryString("friendAccountId"),
+        },
+        success:function(data){
+            var account=data.data[0];
+            //初始化
+            business.self.sexList=[
+                {id:0,value:'未知'},
+                {id:1,value:'男'},
+                {id:2,value:'女'}
+            ];
+            $("#sid").text(account.sid);
+            $("#realname").text(account.realname);
+            $("#birthDate").text(account.birthDate?account.birthDate.substring(0,10):'');
+            if(account.icon){
+                $("#icon").attr("src",account.icon);
+            }
+            $("#sex").text(business.self.sexList[account.sex].value);
+
+
+        },
+        fail:function(data){
+            business.myLoadingToast(data.msg)
         }
     })
-
-
-    /**
-     *   通用上传
-     *   changeElement 变化的file
-     *   callback 回调
-     */
-    business.commonFileUpload=function(changeElement,callback){
-        $(changeElement).change(function(){
-            business.fileUpload({
-                inputfile:$(changeElement),
-                ajaxObj:{
-                    url:'/tool/file/add',
-                    formData:[
-                        {key:"editorUpload",value:$(changeElement).get(0).files[0]}
-                    ],
-                    success:function(url){
-                        if(typeof callback =='function'){
-                            callback(url)
-                        }
-                    }
-
+    //删除好友
+    business.deleteFriend=function(){
+        business.myLoginOut("确定删除吗？", function() {
+            business.ajax({
+                url:'/friend/delete',
+                data:{
+                    accountId:JSON.parse(localStorage.getItem("account")).accountId,
+                    friendAccountId:business.getQueryString("friendAccountId"),
+                },
+                success:function(data){
+                    business.myLoadingToast(data.msg)
+                    business.goback()
+                },
+                fail:function(data){
+                    business.myLoadingToast(data.msg)
                 }
-
             })
         })
+
     }
-    //点击图像上传
-    $("#icon").click(function(){
-        $("#iconInput").click()
-    })
-    business.commonFileUpload("#iconInput",function(url){
-        $("#icon").attr("src",url);
-    })
-    /**
-     * 修改
-     * p.url 修改url
-     * p.requestObject 请求参数对象
-     * p.success 成功回调
-     */
-    //绑定
-    $(document).off("click","#userSubmit");
-    $(document).on("click","#userSubmit",function(){
-        business.updateAccount=account;//复制
-        business.updateAccount.realname=$("#realname").val();
-        business.updateAccount.sex=$("#sex option:selected").val();
-        business.updateAccount.birthDate=$("#birthDate").val()+" 00:00:00";
-        business.updateAccount.icon=$("#icon").attr("src");
-        delete business.updateAccount.role
+    //创建聊天房
+    business.chat=function(){
+        //成员
+        var members=[];
+        members.push(JSON.parse(localStorage.getItem("account")).accountId);
+        members.push(business.getQueryString("friendAccountId"));
+
         business.ajax({
-            url:"/account/update",
-            data:business.updateAccount,
+            url:'/chatRoom/create',
+            data:{
+                type:1,//类型，1普通房，2语音房，3电影房
+                accountId:JSON.parse(localStorage.getItem("account")).accountId,//创建人
+                accountIds:members.toString()//所有成员
+            },
             success:function(data){
-                //初始化
-                localStorage.setItem("account",JSON.stringify(data.data[0]))
-                business.myLoadingToast("修改成功")
+               location.href="chat.html?chatRoomId="+data.data[0].chatRoomId;
+
+            },
+            fail:function(data){
+                business.myLoadingToast(data.msg)
             }
-        });
-    });
+        })
+
+    }
 </script>
 </body>
 </html>

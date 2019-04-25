@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <title>好友</title>
+    <meta charset="UTF-8">
+	<meta name="viewport"
+	content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
+	
+    <meta name="keywords" content="社交、网络"></meta>
+    <meta name="description" content="社交网络已经是人文社会的必须源泉了"></meta>
+    <meta name="content-type" content="text/html; charset=UTF-8"></meta>
+    <link href="resources/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="resources/css/base.css">
+        <style>
+            .friend-wrap{
+                box-sizing: border-box;
+                background-color:#fff;
+                padding:50px 2% 0 2%;
+                margin:auto;
+                width:750px;
+                height:100%;
+                overflow: auto;
+            }
+            @media screen and (max-width:750px){
+
+                .friend-wrap{
+                    width:100%;
+                }
+            }
+        </style>
+  </head>
+  
+  <body>
+  <div class="nav-wrap">
+        <span style="cursor:pointer;position:absolute;left:10px;top:0;" onclick="business.gonav('index')">
+            社交网络
+        </span>
+      <span class="nologin" style="display:none;cursor:pointer;position:absolute;right:68px;top:4px;color:#fff;background-color:red;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gologin()">登陆</span>
+      <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:188px;top:4px;color:#fff;background-color:#2732ff;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('friend',true)">好友</span>
+      <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:118px;top:4px;color:#fff;background-color:#9fff2d;width:58px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('circle',true)">时光圈</span>
+      <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:68px;top:4px;color:#fff;background-color:#c51fff;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('user',true)">我的</span>
+      <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:22px;top:4px;color:#000;background-color:#ececec;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.loginout()">登出</span>
+      <!--<span style="cursor:pointer;position:absolute;right:8px;top:4px;color:#fff;background-color:#5a83f1;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.goregister()">注册</span>-->
+  </div>
+  <!-- 好友 -->
+  <div class="friend-wrap">
+      <!-- 聊天房-->
+    <div style="padding:20px;" id="chatRoomList">
+
+    </div>
+      <!-- 聊天房 end-->
+      <!-- 好友 -->
+    <div style="padding:20px;display: none;" id="friendList">
+    </div>
+      <!-- 好友 end-->
+      <!-- 好友申请 -->
+    <div style="padding:20px;display: none;" id="friendApplyList">
+        <!--<h2 style="text-align: center;">新朋友申请</h2>-->
+    </div>
+      <!-- 好友申请 end-->
+  </div>
+  <!-- 好友 end-->
+
+  <!-- 固定栏-->
+  <div class="mer-footer" style="border-top:1px solid #ececec;">
+      <div class ="mer-footer-div" style="width:33%;left:0;color:red;">
+          <a id="menu1" onclick="business.menuClick(this.id)">
+              <i class="fa fa-comment nav-active" style="font-size:26px;" ></i>
+              <span class="nav-active">消息</span>
+          </a>
+      </div>
+      <div class ="mer-footer-div" style="width:33%;left:33%">
+          <a id="menu2" onclick="business.menuClick(this.id)">
+              <i class="fa fa-vcard" style="font-size:26px;"></i>
+              <span>好友</span>
+          </a>
+      </div>
+      <div class ="mer-footer-div" style="width:33%;left:66%">
+          <a id="menu3" onclick="business.menuClick(this.id)">
+              <i class="fa fa-user-plus" style="font-size:26px;"></i>
+              <span>新朋友</span>
+          </a>
+      </div>
+
+  </div>
+  <!-- 固定栏 end-->
+
+  <script src="resources/js/jquery1.12.2.js"></script>
+  <script src="resources/js/base.js"></script>
+  <script>
+      business.isBottom=false;
+      //点击底部导航
+      business.menuClick=function(value){
+          $(".mer-footer-div i,span").removeClass("nav-active");
+          $("#"+value).children().addClass("nav-active");
+          //重置参数
+          business.params=JSON.parse(JSON.stringify(business.originParams));
+          business.isBottom=false;
+          //menu1消息，menu2好友，menu3新朋友
+          if(value=='menu1'){
+            $("#chatRecordList").show();
+            $("#friendList").hide();
+            $("#friendApplyList").hide();
+          }else if(value=='menu2'){
+              $("#chatRecordList").hide();
+              $("#friendList").show();
+              $("#friendApplyList").hide();
+
+              $("#friendList").html("");
+              business.getFriendList();
+              business.scrollFlush(business.getFriendList);
+          }else if(value=='menu3'){
+              $("#chatRecordList").hide();
+              $("#friendList").hide();
+              $("#friendApplyList").show();
+
+              $("#friendApplyList").html("");
+              business.getFriendApplyList();
+              business.scrollFlush(business.getFriendApplyList);
+          }
+          //记录menu
+          localStorage.setItem('menu',value);
+      }
+
+    //好友列表
+    business.getFriendList=function(){
+        business.params.pageNum= (business.params.currentPage-1)*business.params.pageSize+1
+        business.params.currentPage++;
+        business.params.accountId=JSON.parse(localStorage.getItem("account")).accountId
+        business.ajax({
+            url:"/friend/count",
+            data:business.params,
+            success:function(d){
+                business.params.total=d.data[0];
+                business.ajax({
+                    url:"/friend/list",
+                    data:business.params,
+                    success:function(data){
+                        var html="";
+                        business.friendList=data.data;
+                        for (var i = 0; i <business.friendList.length ; i++) {
+                            var friend=business.friendList[i];
+                            var json=JSON.stringify(friend);
+                            json=json.replace(/"/g,"'");
+                           // console.log(json)
+                            var icon=friend.friendAccount.icon;
+                            if(!icon){
+                                icon="resources/img/head_2.png";
+                            }
+                            html+='<div onclick="business.friendInfo('+json+')" style="border-bottom:1px solid #ececec;padding:5px;cursor:pointer;background-color: #fff;">\n' +
+                                '            <div style="display: inline-block;width:10%;vertical-align:middle;">\n' +
+                                '                <img src="'+icon+'" style="width:100%;" alt="">\n' +
+                                '            </div>\n' +
+                                '            <div style="display: inline-block;width:88%;">\n' +
+                                '                <div style="color:#558eff">'+friend.friendAccount.realname+'</div>\n' +
+                                '            </div>\n' +
+                                '        </div>';
+                        }
+                        $("#friendList").append(html);
+
+                    },
+                    fail:function(data){
+                        if(data.code==30002){
+                            var value=data.msg;
+                            if(!business.friendList||business.friendList.length==0){
+                                value="暂无"
+                            }
+                            business.isBottom=true;
+                            $("#friendList").append('<div style="padding-top:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
+
+                        }
+                    }
+                })
+
+
+            },
+            fail:function(){
+                business.isBottom=true;
+            }
+        })
+    }
+    //跳转
+      business.friendInfo=function(friend){
+          location.href="friend_info.html?friendAccountId="+friend.friendAccountId;
+      }
+
+      //新朋友、朋友申请列表
+      business.getFriendApplyList=function(){
+          business.params.pageNum= (business.params.currentPage-1)*business.params.pageSize+1
+          business.params.currentPage++;
+          business.params.friendAccountId=JSON.parse(localStorage.getItem("account")).accountId
+          business.ajax({
+              url:"/friendApply/count",
+              data:business.params,
+              success:function(d){
+                  business.params.total=d.data[0];
+                  business.ajax({
+                      url:"/friendApply/list",
+                      data:business.params,
+                      success:function(data){
+                          var html="";
+                          business.friendApplyList=data.data;
+                          for (var i = 0; i <business.friendApplyList.length ; i++) {
+                              var friendApply=business.friendApplyList[i];
+                              var json=JSON.stringify(friendApply);
+                              json=json.replace(/"/g,"'");
+                              var icon=friendApply.account.icon;
+                              if(!icon){
+                                  icon="resources/img/head_2.png";
+                              }
+                              var statusvalue="";
+                              if(friendApply.status==1){
+                                  statusvalue= '<a onclick="business.agreeOrRefuse('+json+',2)" style="color:#fff;background-color:#7cff42;width:38px;height:38px;padding:5px;border-radius: 100%;box-shadow:0 0 0 5px #ececec;margin:5px;">√</a>\n' +
+                                      '<a onclick="business.agreeOrRefuse('+json+',3)" style="color:#fff;background-color:red;width:38px;height:38px;padding:5px;border-radius: 100%;box-shadow:0 0 0 5px #ececec;margin:5px;">×</a>\n' ;
+                              }else if(friendApply.status==2){
+                                   statusvalue='<span style="color:green;">已同意</span>'
+                              }else if(friendApply.status==3){
+                                  statusvalue='<span style="color:red;">已拒绝</span>'
+                              }
+                              html+='<div style="border-bottom:1px solid #ececec;padding:5px;cursor:pointer;background-color: #fff;">\n' +
+                                  '            <div style="display: inline-block;width:10%;vertical-align:top;">\n' +
+                                  '                <img src="'+icon+'" style="width:100%;" alt="">\n' +
+                                  '            </div>\n' +
+                                  '            <div style="display: inline-block;width:88%;">\n' +
+                                  '                <div style="color:#558eff">'+friendApply.account.realname+'</div>\n' +
+                                  '                <div style="text-align:right;margin-top:20px;" id="friendApplyId'+friendApply.friendApplyId+'">\n' +
+                                                        statusvalue+
+                                  '                </div>\n' +
+                                  '            </div>\n' +
+                                  '        </div>';
+                          }
+                          $("#friendApplyList").append(html);
+
+                      },
+                      fail:function(data){
+                          if(data.code==30002){
+                              var value=data.msg;
+                              if(!business.friendApplyList||business.friendApplyList.length==0){
+                                  value="暂无"
+                                }
+                              business.isBottom=true;
+                              $("#friendApplyList").append('<div style="padding-top:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
+
+                          }
+
+                      }
+                  })
+
+
+              },
+              fail:function(){
+                  business.isBottom=true;
+              }
+          })
+      }
+
+      //滚动刷新
+      business.scrollFlush=function(callback){
+          $(window).scroll(function(){
+              if(!navigator.onLine){
+                  business.myLoadingToast("请检查网络！");
+                  return;
+              }
+              if(navigator.onLine&&!business.isBottom&& business.isScrollBottom(document)){
+                  console.log(111)
+                  callback()
+              }
+          });
+      }
+      //同意或拒绝添加好友
+      business.agreeOrRefuse=function(friendApply,status){
+          business.ajax({
+              url:'/friendApply/agreeOrRefuse',
+              data:{
+                  friendApplyId:friendApply.friendApplyId,
+                  status:status
+              },
+              success:function(data){
+                  var statusvalue=""
+                  if(status==2){
+                      business.myLoadingToast("添加成功")
+                      statusvalue='<span style="color:green;">已同意</span>';
+                  }else if(status==3){
+                      business.myLoadingToast("拒绝成功")
+                      statusvalue='<span style="color:red;">已拒绝</span>';
+                  }
+                  $("#friendApplyId"+friendApply.friendApplyId).html(statusvalue);
+
+              },
+              fail:function(data){
+                  business.myLoadingToast(data.msg)
+              }
+          })
+      }
+
+      //自动点击
+      if(localStorage.getItem('menu')){
+          business.menuClick(localStorage.getItem('menu'))
+      }
+  </script>
+  </body>
+</html>

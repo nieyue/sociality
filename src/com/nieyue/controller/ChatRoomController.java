@@ -1,8 +1,11 @@
 package com.nieyue.controller;
 
 import com.nieyue.bean.ChatRoom;
+import com.nieyue.bean.ChatRoomMember;
+import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.exception.NotAnymoreException;
 import com.nieyue.exception.NotIsNotExistException;
+import com.nieyue.service.ChatRoomMemberService;
 import com.nieyue.service.ChatRoomService;
 import com.nieyue.util.ResultUtil;
 import com.nieyue.util.StateResultList;
@@ -10,6 +13,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -27,9 +32,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/chatRoom")
 public class ChatRoomController {
-	@Resource
+	@Autowired
 	private ChatRoomService chatRoomService;
-	
+	@Autowired
+	private ChatRoomMemberService chatRoomMemberService;
+
 	/**
 	 * 聊天房分页浏览
 	 * @param orderName 商品排序数据库字段
@@ -84,6 +91,83 @@ public class ChatRoomController {
 		boolean am = chatRoomService.add(chatRoom);
 		if(am){
 			List<ChatRoom> list = new ArrayList<>();
+			list.add(chatRoom);
+			return ResultUtil.getSlefSRSuccessList(list);
+		}
+		return ResultUtil.getSlefSRFailList(null);
+	}
+	/**
+	 * 创建聊天房
+	 * @return
+	 */
+	@ApiOperation(value = "创建聊天房", notes = "创建聊天房")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name="type",value="类型，1普通房，2语音房，3电影房",dataType="int", paramType = "query",required = true),
+			@ApiImplicitParam(name="name",value="名称",dataType="string", paramType = "query"),
+			@ApiImplicitParam(name="url",value="语音或电影url",dataType="string", paramType = "query"),
+			@ApiImplicitParam(name="accountId",value="创建账户id",dataType="int", paramType = "query",required = true),
+			@ApiImplicitParam(name="accountIds",value="所有成员",dataType="string", paramType = "query",required = true),
+	})
+	@RequestMapping(value = "/create", method = {RequestMethod.GET,RequestMethod.POST})
+	public @ResponseBody StateResultList<List<ChatRoom>> create(
+			@RequestParam("type") Integer type,
+			@RequestParam(value="name",required = false) String name,
+			@RequestParam(value="url",required = false) String url,
+			@RequestParam("accountId") Integer accountId,
+			@RequestParam("accountIds") String accountIds,
+			HttpSession session) {
+		if(StringUtils.isEmpty(accountIds)){
+			throw new CommonRollbackException("缺少成员");
+		}
+		List<ChatRoom> list = new ArrayList<>();
+		String[] aids = accountIds.split(",");
+		ChatRoom chatRoom=new ChatRoom();
+		chatRoom.setType(type);
+		chatRoom.setName(name);
+		chatRoom.setUrl(url);
+		chatRoom.setAccountId(accountId);
+		//判断是否已经存在,只有两人聊天才判断
+		if(aids.length==2){
+			//获取非发起人的账户id
+			Integer accountId2 = null;
+			for (int i = 0; i <aids.length ; i++) {
+				Integer aid = Integer.valueOf(aids[i]);
+				if(!aid.equals(accountId)){
+					accountId2=aid;
+					break;
+				}
+			}
+			//先查询发起人所有聊天房成员
+			List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(null, accountId, 1, Integer.MAX_VALUE, "chat_room_member_id", "desc");
+			int number=0;
+			for (int i = 0; i < chatRoomMemberList.size(); i++) {
+				ChatRoomMember chatRoomMember = chatRoomMemberList.get(i);
+				number = chatRoomMemberService.count(chatRoomMember.getChatRoomId(), accountId2);
+				if(number>0){
+					ChatRoom cr = chatRoomService.load(chatRoomMember.getChatRoomId());
+					list.add(cr);
+					break;
+				}
+			}
+			//已经存在
+			if(number>0){
+				return ResultUtil.getSlefSRSuccessList(list);
+			}
+
+		}
+		boolean am = chatRoomService.add(chatRoom);
+
+
+		ChatRoomMember chatRoomMember;
+		for (int i = 0; i <aids.length ; i++) {
+			Integer aid = Integer.valueOf(aids[i]);
+			chatRoomMember=new ChatRoomMember();
+			chatRoomMember.setAccountId(aid);
+			chatRoomMember.setChatRoomId(chatRoom.getChatRoomId());
+			chatRoomMemberService.add(chatRoomMember);
+		}
+		if(am){
+
 			list.add(chatRoom);
 			return ResultUtil.getSlefSRSuccessList(list);
 		}

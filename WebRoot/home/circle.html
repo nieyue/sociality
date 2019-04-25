@@ -2,6 +2,7 @@
 <html>
     <head>
     <title>时光圈</title>
+    <meta charset="UTF-8">
 	<meta name="viewport"
 	content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
 	
@@ -26,6 +27,7 @@
                     width:100%;
                 }
             }
+
         </style>
   </head>
   
@@ -44,6 +46,20 @@
   <!-- 时光圈 -->
   <div class="circle-wrap">
     <div style="text-align: center;font-size:2rem;">时光圈</div>
+    <div style="text-align:right;">
+        <a onclick="business.clickAddCircle()" style="cursor:pointer;color:#fff;background-color:#558eff;width:68px;height:68px;border:1px solid #558eff;padding:5px;border-radius: 100%;box-shadow:0 0 0 5px #ececec;">发时光圈</a>
+    </div>
+    <div id="circleAdd"  style="display: none;position:fixed;left:10%;top:10%;z-index:99;background-color:#fff;width:80%;height:80%;border:1px solid #ececec;box-shadow: 0 0 0 5px #ececec;border-radius: 20px;">
+        <div onclick="javascript:document.getElementById('circleAdd').style.display='none';" style="border:1px solid blue;width:20px;height: 20px;color:#fff;background-color: blue;text-align: center;line-height: 20px;cursor:pointer;border-radius: 100%;float: right;">X</div>
+        <div style="height:50px;"></div>
+        <div class="form-input-wrap">
+            <span class="form-input-span">&#12288;内容：</span>
+            <textarea type="text" id="content" class="form-input-input" placeholder="0-255"></textarea>
+        </div>
+        <div style="margin:25px;text-align:center;">
+            <button onclick="business.addCircle()" style="background-color:red;border:1px solid red;color:#fff;height:30px;width:60%;">发布</button>
+        </div>
+    </div>
     <div style="padding:20px;" id="circleList">
         <!--<div style="border-bottom:1px solid #ececec;padding:5px;cursor:pointer;background-color: #fff;">
             <div style="display: inline-block;width:10%;vertical-align:top;">
@@ -70,6 +86,40 @@
   <script src="resources/js/jquery.twbsPagination.js"></script>
   <script src="resources/js/base.js"></script>
   <script>
+      //点击时光圈
+      business.clickAddCircle=function(){
+          if($("#circleAdd").css("display")=='none'){
+             // $("#circleAdd").show();
+              $("#circleAdd").fadeIn();
+          }else{
+              //$("#circleAdd").hide();
+              $("#circleAdd").fadeOut();
+          }
+
+      }
+      //增加时光圈
+      business.addCircle=function(){
+        var content=$("#content").val();
+        if(!content||content.length<2||content.length>255){
+            business.myLoadingToast("内容2-255")
+            return;
+        }
+        business.ajax({
+              url:'/circle/add',
+              data:{
+                  accountId:JSON.parse(localStorage.getItem("account")).accountId,
+                  content:content,
+              },
+              success:function(data){
+                  business.myLoadingToast(data.msg)
+                  location.reload()
+              },
+              fail:function(data){
+                  business.myLoadingToast(data.msg)
+              }
+          })
+      };
+      //时光圈列表
     business.getCircleList=function(){
         business.ajax({
             url:"/circle/count",
@@ -85,11 +135,16 @@
                             var circle=business.circleList[i];
                             var json=JSON.stringify(circle);
                             json=json.replace(/"/g,"'");
-                            console.log(json)
+                          //  console.log(json)
                             var icon=circle.account.icon;
                             if(!icon){
                                 icon="resources/img/head_2.png";
                             }
+                            var addfriendhtml='                    <a onclick="business.addFriend('+json+')" style="color:#fff;background-color:#7cff42;width:38px;height:38px;padding:5px;border-radius: 100%;box-shadow:0 0 0 5px #ececec;margin:5px;">关注</a>\n';
+                           //自己不能关注自己
+                            if(circle.accountId==JSON.parse(localStorage.getItem("account")).accountId){
+                               addfriendhtml=''
+                           }
                             html+='<div style="border-bottom:1px solid #ececec;padding:5px;cursor:pointer;background-color: #fff;">\n' +
                                 '            <div style="display: inline-block;width:10%;vertical-align:top;">\n' +
                                 '                <img src="'+icon+'" style="width:100%;" alt="">\n' +
@@ -98,8 +153,8 @@
                                 '                <div style="color:#558eff">'+circle.account.realname+'</div>\n' +
                                 '                <div>'+circle.content+'</div>\n' +
                                 '                <div style="text-align:right;margin-top:20px;">\n' +
-                                '                    <a onclick="business.addFriend('+json+')" style="color:#fff;background-color:#7cff42;width:38px;height:38px;padding:5px;border-radius: 100%;box-shadow:0 0 0 5px #ececec;">关注</a>\n' +
-                                '                    <a onclick="business.addPraisePoints('+json+')" style="color:#fff;background-color:red;width:38px;height:38px;padding:5px;border-radius: 100%;box-shadow:0 0 0 5px #ececec;"><span id="circlePraisePoints'+circle.circleId+'">'+circle.praisePoints+'</span>赞</a>\n' +
+                                addfriendhtml+
+                                '                    <a onclick="business.addPraisePoints('+json+')" style="color:#fff;background-color:red;width:38px;height:38px;padding:5px;border-radius: 100%;box-shadow:0 0 0 5px #ececec;margin:5px;"><span id="circlePraisePoints'+circle.circleId+'">'+circle.praisePoints+'</span>赞</a>\n' +
                                 '                </div>\n' +
                                 '            </div>\n' +
                                 '        </div>';
@@ -133,11 +188,10 @@
     business.addFriend=function(circle){
 
         business.ajax({
-            url:'/friendApply/add',
+            url:'/friendApply/apply',
             data:{
                 accountId:JSON.parse(localStorage.getItem("account")).accountId,
                 friendAccountId:circle.accountId,
-                status:1//状态，默认1申请中，2已同意，3已拒绝
             },
             success:function(data){
                 //登录

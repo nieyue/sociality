@@ -66,6 +66,15 @@
             <scope>provided</scope>
             <!-- 表示开发的时候引入，发布的时候不会加载此包 -->
         </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+        </dependency>
 
         <!-- netty-all -->
         <!-- 	<dependency>
@@ -451,6 +460,17 @@
             <version>4.0.1</version>
         </dependency>
 
+        <!-- websocket-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
 
 
 

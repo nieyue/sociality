@@ -97,16 +97,22 @@ public class FriendController {
 	 */
 	@ApiOperation(value = "好友删除", notes = "好友删除")
 	@ApiImplicitParams({
-		  @ApiImplicitParam(name="friendId",value="好友ID",dataType="int", paramType = "query",required=true)
+		  @ApiImplicitParam(name="accountId",value="账户id",dataType="int", paramType = "query",required=true),
+		  @ApiImplicitParam(name="friendAccountId",value="好友ID",dataType="int", paramType = "query",required=true)
 		  })
 	@RequestMapping(value = "/delete", method = {RequestMethod.GET,RequestMethod.POST})
-	public @ResponseBody StateResultList<List<Friend>> delete(@RequestParam("friendId") Integer friendId,HttpSession session)  {
-		Friend friend = friendService.load(friendId);
-		boolean dm = friendService.delete(friendId);
+	public @ResponseBody StateResultList<List<Friend>> delete(
+			@RequestParam("accountId") Integer accountId,
+			@RequestParam("friendAccountId") Integer friendAccountId,
+			HttpSession session)  {
+		List<Friend> friendList = friendService.list(accountId, friendAccountId, 1,Integer.MAX_VALUE,"friend_id","desc");
+		friendList .addAll( friendService.list(friendAccountId, accountId, 1,Integer.MAX_VALUE,"friend_id","desc"));
+		boolean dm=false;
+		for (int i = 0; i < friendList.size(); i++) {
+			dm = friendService.delete(friendList.get(i).getFriendId());
+		}
 		if(dm){
-			List<Friend> list = new ArrayList<>();
-			list.add(friend);
-			return ResultUtil.getSlefSRSuccessList(list);
+			return ResultUtil.getSlefSRSuccessList(friendList);
 		}
 		return ResultUtil.getSlefSRFailList(null);
 	}

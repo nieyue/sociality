@@ -74,6 +74,37 @@ body{
 .pagination .page-item.active .page-link{
     color:#fff;
 }
+
+/**
+**表单
+ */
+.form-input-wrap{
+    height:50px;
+    border-bottom:1px solid #ececec;
+    position:relative;
+    left:0;top:0;
+}
+.form-input-span{
+    display: inline-block;
+    line-height: 48px;
+    height:100%;
+    width:60px;
+    position:absolute;
+    left:0;
+    top:0;
+    z-index:11;
+}
+.form-input-input{
+    border:0 solid #ccc;
+    height:100%;
+    width:100%;
+    padding-left:60px;
+    position:absolute;
+    left:0;
+    top:0;
+    box-sizing: border-box;
+    z-index:10;
+}
 /**
 **导航活跃
 */
@@ -217,7 +248,7 @@ width:100%;
    transform: translate(-50%,0);
   }
   .mer-footer-div{
-  
+  cursor:pointer;
   display: inline-block;
   height:50px;
   position: absolute;

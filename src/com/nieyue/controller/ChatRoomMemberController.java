@@ -10,9 +10,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +27,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/chatRoomMember")
 public class ChatRoomMemberController {
-	@Resource
+	@Autowired
 	private ChatRoomMemberService chatRoomMemberService;
-	
+
 	/**
 	 * 聊天房成员分页浏览
-	 * @param orderName 商品排序数据库字段
-	 * @param orderWay 商品排序方法 asc升序 desc降序
+	 * @param orderName 排序数据库字段
+	 * @param orderWay 排序方法 asc升序 desc降序
 	 * @return
 	 */
 	@ApiOperation(value = "聊天房成员列表", notes = "聊天房成员分页浏览")
@@ -61,6 +61,7 @@ public class ChatRoomMemberController {
 				throw new NotAnymoreException();//没有更多
 			}
 	}
+
 	/**
 	 * 聊天房成员修改
 	 * @return

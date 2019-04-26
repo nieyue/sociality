@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 聊天房
@@ -22,9 +23,9 @@ public class ChatRoom implements Serializable{
     @ApiModelProperty(value="聊天房id")
     private Integer chatRoomId;
     /**
-     * 类型，1语音房，2电影房
+     * 类型，1私聊，2普通房，3语音房，4电影房
      */
-    @ApiModelProperty(value="类型，1普通房，2语音房，3电影房")
+    @ApiModelProperty(value="类型，1私聊，2普通房，3语音房，4电影房")
     private Integer type;
     /**
      * 名称
@@ -51,9 +52,20 @@ public class ChatRoom implements Serializable{
      */
     @ApiModelProperty(value="账户id外键")
     private Integer accountId;
+    /**
+     * 账户
+     */
+    @ApiModelProperty(value="账户")
+    private Account account;
+    /**
+     * 聊天房成员列表
+     */
+    @ApiModelProperty(value="聊天房成员列表")
+    private List<ChatRoomMember> chatRoomMemberList;
 
     public ChatRoom() {
     }
+
     public Integer getChatRoomId() {
         return this.chatRoomId;
     }
@@ -82,6 +94,14 @@ public class ChatRoom implements Serializable{
         return this.accountId;
     }
 
+    public Account getAccount() {
+        return this.account;
+    }
+
+    public List<ChatRoomMember> getChatRoomMemberList() {
+        return this.chatRoomMemberList;
+    }
+
     public void setChatRoomId(Integer chatRoomId) {
         this.chatRoomId = chatRoomId;
     }
@@ -108,6 +128,14 @@ public class ChatRoom implements Serializable{
 
     public void setAccountId(Integer accountId) {
         this.accountId = accountId;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public void setChatRoomMemberList(List<ChatRoomMember> chatRoomMemberList) {
+        this.chatRoomMemberList = chatRoomMemberList;
     }
 
     public boolean equals(Object o) {
@@ -139,6 +167,13 @@ public class ChatRoom implements Serializable{
         final Object this$accountId = this.getAccountId();
         final Object other$accountId = other.getAccountId();
         if (this$accountId == null ? other$accountId != null : !this$accountId.equals(other$accountId)) return false;
+        final Object this$account = this.getAccount();
+        final Object other$account = other.getAccount();
+        if (this$account == null ? other$account != null : !this$account.equals(other$account)) return false;
+        final Object this$chatRoomMemberList = this.getChatRoomMemberList();
+        final Object other$chatRoomMemberList = other.getChatRoomMemberList();
+        if (this$chatRoomMemberList == null ? other$chatRoomMemberList != null : !this$chatRoomMemberList.equals(other$chatRoomMemberList))
+            return false;
         return true;
     }
 
@@ -159,6 +194,10 @@ public class ChatRoom implements Serializable{
         result = result * PRIME + ($updateDate == null ? 43 : $updateDate.hashCode());
         final Object $accountId = this.getAccountId();
         result = result * PRIME + ($accountId == null ? 43 : $accountId.hashCode());
+        final Object $account = this.getAccount();
+        result = result * PRIME + ($account == null ? 43 : $account.hashCode());
+        final Object $chatRoomMemberList = this.getChatRoomMemberList();
+        result = result * PRIME + ($chatRoomMemberList == null ? 43 : $chatRoomMemberList.hashCode());
         return result;
     }
 
@@ -167,7 +206,7 @@ public class ChatRoom implements Serializable{
     }
 
     public String toString() {
-        return "ChatRoom(chatRoomId=" + this.getChatRoomId() + ", type=" + this.getType() + ", name=" + this.getName() + ", url=" + this.getUrl() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", accountId=" + this.getAccountId() + ")";
+        return "ChatRoom(chatRoomId=" + this.getChatRoomId() + ", type=" + this.getType() + ", name=" + this.getName() + ", url=" + this.getUrl() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", accountId=" + this.getAccountId() + ", account=" + this.getAccount() + ", chatRoomMemberList=" + this.getChatRoomMemberList() + ")";
     }
 }
 

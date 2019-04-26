@@ -4,6 +4,7 @@ import com.nieyue.bean.Account;
 import com.nieyue.exception.*;
 import com.nieyue.service.AccountService;
 import com.nieyue.util.*;
+import com.nieyue.websocket.WebSocketMapService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -11,6 +12,9 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
+import org.springframework.web.socket.sockjs.client.WebSocketClientSockJsSession;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
@@ -284,6 +288,11 @@ public class AccountController {
 		}*/
 		List<Account> list = new ArrayList<Account>();
 		Account account = accountService.login(adminName, MyDESutil.getMD5(password),null);
+		if(SingletonHashMap.getInstance().get("accountId"+account.getAccountId())!=null){
+			throw new AccountIsLoginException();//账户已经登录
+		}else{
+			SingletonHashMap.getInstance().put("accountId"+account.getAccountId(),account.getAccountId());
+		}
 		if (ObjectUtils.isEmpty(account)) {
 			throw new AccountLoginException();//账户或密码错误
 		}
@@ -329,6 +338,7 @@ public class AccountController {
 			@RequestParam("accountId") Integer accountId,
 			HttpSession session)  {
 		session.invalidate();
+		SingletonHashMap.getInstance().remove("accountId"+accountId);
 		return ResultUtil.getSlefSRSuccessList(null);
 	}
 

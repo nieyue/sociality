@@ -1,20 +1,28 @@
 package com.nieyue.service.impl;
 
+import com.nieyue.bean.Account;
 import com.nieyue.bean.ChatRoom;
+import com.nieyue.bean.ChatRoomMember;
 import com.nieyue.dao.ChatRoomDao;
+import com.nieyue.service.AccountService;
+import com.nieyue.service.ChatRoomMemberService;
 import com.nieyue.service.ChatRoomService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public class ChatRoomServiceImpl implements ChatRoomService{
-	@Resource
+	@Autowired
 	ChatRoomDao chatRoomDao;
+	@Autowired
+	AccountService accountService;
+	@Autowired
+	ChatRoomMemberService chatRoomMemberService;
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public boolean add(ChatRoom chatRoom) {
@@ -40,6 +48,12 @@ public class ChatRoomServiceImpl implements ChatRoomService{
 	@Override
 	public ChatRoom load(Integer chatRoomId) {
 		ChatRoom r = chatRoomDao.load(chatRoomId);
+		if(r!=null){
+			Account account = accountService.load(r.getAccountId());
+			r.setAccount(account);
+			List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(chatRoomId, null, 1, Integer.MAX_VALUE, "chat_room_member_id", "desc");
+			r.setChatRoomMemberList(chatRoomMemberList);
+		}
 		return r;
 	}
 
@@ -59,6 +73,14 @@ public class ChatRoomServiceImpl implements ChatRoomService{
 			pageSize=0;//没有数据
 		}
 		List<ChatRoom> l = chatRoomDao.list(accountId,pageNum-1, pageSize, orderName, orderWay);
+		l.forEach(r->{
+			if(r!=null){
+				Account account = accountService.load(r.getAccountId());
+				r.setAccount(account);
+				List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(r.getChatRoomId(), null, 1, Integer.MAX_VALUE, "chat_room_member_id", "desc");
+				r.setChatRoomMemberList(chatRoomMemberList);
+			}
+		});
 		return l;
 	}
 

@@ -36,6 +36,7 @@
             社交网络
         </span>
       <span class="nologin" style="display:none;cursor:pointer;position:absolute;right:68px;top:4px;color:#fff;background-color:red;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gologin()">登陆</span>
+      <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:238px;top:4px;color:#fff;background-color:#f45fff;width:58px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('chat_room',true)">聊天房</span>
       <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:188px;top:4px;color:#fff;background-color:#2732ff;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('friend',true)">好友</span>
       <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:118px;top:4px;color:#fff;background-color:#9fff2d;width:58px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('circle',true)">时光圈</span>
       <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:68px;top:4px;color:#fff;background-color:#c51fff;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('user',true)">我的</span>
@@ -98,11 +99,15 @@
           business.isBottom=false;
           //menu1消息，menu2好友，menu3新朋友
           if(value=='menu1'){
-            $("#chatRecordList").show();
+            $("#chatRoomList").show();
             $("#friendList").hide();
             $("#friendApplyList").hide();
+
+              $("#chatRoomList").html("");
+              business.getChatRoomList();
+              business.scrollFlush(business.getChatRoomList);
           }else if(value=='menu2'){
-              $("#chatRecordList").hide();
+              $("#chatRoomList").hide();
               $("#friendList").show();
               $("#friendApplyList").hide();
 
@@ -110,7 +115,7 @@
               business.getFriendList();
               business.scrollFlush(business.getFriendList);
           }else if(value=='menu3'){
-              $("#chatRecordList").hide();
+              $("#chatRoomList").hide();
               $("#friendList").hide();
               $("#friendApplyList").show();
 
@@ -121,7 +126,82 @@
           //记录menu
           localStorage.setItem('menu',value);
       }
+      //消息列表（聊天房列表，根据聊天成员查询聊天房）
+      business.getChatRoomList=function(){
+          business.params.pageNum= (business.params.currentPage-1)*business.params.pageSize+1
+          business.params.currentPage++;
+          business.params.accountId=JSON.parse(localStorage.getItem("account")).accountId
+          business.ajax({
+              url:"/chatRoomMember/count",//查询聊天成员的数量
+              data:business.params,
+              success:function(d){
+                  business.params.total=d.data[0];
+                  business.params.pageSize=d.data[0];//设置全部查询
+                  business.ajax({
+                      url:"/chatRoom/chatRoomList",
+                      data:business.params,
+                      success:function(data){
+                          var html="";
+                          business.chatRoomList=data.data;
+                          for (var i = 0; i <business.chatRoomList.length ; i++) {
+                              var chatRoom=business.chatRoomList[i];
+                              var json=JSON.stringify(chatRoom);
+                              json=json.replace(/"/g,"'");
+                              // console.log(json)
+                              var chatRoomMemberList=chatRoom.chatRoomMemberList;
+                              var icon,name;
+                              if(chatRoom.type==1){
+                                  //私聊
+                                  for (var j = 0; j < chatRoomMemberList.length; j++) {
+                                      //私聊，只显示对方
+                                      if(chatRoomMemberList[j].accountId!=JSON.parse(JSON.parse(localStorage.getItem("account")).accountId)){
+                                          icon=chatRoomMemberList[j].account.icon;
+                                         // console.log(chatRoom.name)
+                                         // console.log(chatRoomMemberList[j].account.realname)
+                                          name=chatRoom.name?chatRoom.name:chatRoomMemberList[j].account.realname
+                                      }
+                                  }
+                              }else{
+                              }
+                              if(!icon){
+                                  icon="resources/img/head_2.png";
+                              }
+                              html+='<div onclick="business.goChat('+json+')" style="border-bottom:1px solid #ececec;padding:5px;cursor:pointer;background-color: #fff;">\n' +
+                                  '            <div style="display: inline-block;width:10%;vertical-align:middle;">\n' +
+                                  '                <img src="'+icon+'" style="width:100%;" alt="">\n' +
+                                  '            </div>\n' +
+                                  '            <div style="display: inline-block;width:88%;">\n' +
+                                  '                <div style="color:#558eff">'+name+'</div>\n' +
+                                  '            </div>\n' +
+                                  '        </div>';
+                          }
+                          $("#chatRoomList").append(html);
 
+                      },
+                      fail:function(data){
+                          if(data.code==30002){
+                              var value=data.msg;
+                              if(!business.chatRoomList||business.chatRoomList.length==0){
+                                  value="暂无"
+                              }
+                              business.isBottom=true;
+                              $("#chatRoomList").append('<div style="padding-top:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
+
+                          }
+                      }
+                  })
+
+
+              },
+              fail:function(){
+                  business.isBottom=true;
+              }
+          })
+      }
+      //跳转聊天房
+      business.goChat=function(json){
+          location.href="chat.html?chatRoomId="+json.chatRoomId;
+      }
     //好友列表
     business.getFriendList=function(){
         business.params.pageNum= (business.params.currentPage-1)*business.params.pageSize+1
@@ -179,7 +259,7 @@
             }
         })
     }
-    //跳转
+    //跳转好友信息
       business.friendInfo=function(friend){
           location.href="friend_info.html?friendAccountId="+friend.friendAccountId;
       }

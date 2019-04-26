@@ -1,6 +1,7 @@
 package com.nieyue.util;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -13,16 +14,16 @@ public class SingletonHashMap {
     private SingletonHashMap() {}
 
     private static class SingletonInstance {
-        private static final HashMap<String,Object> INSTANCE = new HashMap<String,Object>();
+        private static final Map<String,Object> INSTANCE = new ConcurrentHashMap<String,Object>();
     }
 
-    public static HashMap<String,Object> getInstance() {
+    public static Map<String,Object> getInstance() {
         return SingletonInstance.INSTANCE;
     }
     
     public static void main(String[] args) {
-		HashMap<String,Object> a=  SingletonHashMap.getInstance(); 
-		HashMap<String,Object> b=  SingletonHashMap.getInstance(); 
+		Map<String,Object> a=  SingletonHashMap.getInstance();
+		Map<String,Object> b=  SingletonHashMap.getInstance();
 		a.put("accountId"+1000, 1000);
 		b.put("accountId"+1000, 1000);
 		b.put("accountId"+1001, 1001);

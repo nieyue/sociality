@@ -46,6 +46,11 @@ public class ChatRoomRecord implements Serializable{
      */
     @ApiModelProperty(value="账户id外键")
     private Integer accountId;
+    /**
+     * 账户
+     */
+    @ApiModelProperty(value="账户")
+    private Account account;
 
     public ChatRoomRecord() {
     }
@@ -74,6 +79,10 @@ public class ChatRoomRecord implements Serializable{
         return this.accountId;
     }
 
+    public Account getAccount() {
+        return this.account;
+    }
+
     public void setChatRoomRecordId(Integer chatRoomRecordId) {
         this.chatRoomRecordId = chatRoomRecordId;
     }
@@ -96,6 +105,10 @@ public class ChatRoomRecord implements Serializable{
 
     public void setAccountId(Integer accountId) {
         this.accountId = accountId;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     public boolean equals(Object o) {
@@ -125,6 +138,9 @@ public class ChatRoomRecord implements Serializable{
         final Object this$accountId = this.getAccountId();
         final Object other$accountId = other.getAccountId();
         if (this$accountId == null ? other$accountId != null : !this$accountId.equals(other$accountId)) return false;
+        final Object this$account = this.getAccount();
+        final Object other$account = other.getAccount();
+        if (this$account == null ? other$account != null : !this$account.equals(other$account)) return false;
         return true;
     }
 
@@ -143,6 +159,8 @@ public class ChatRoomRecord implements Serializable{
         result = result * PRIME + ($chatRoomId == null ? 43 : $chatRoomId.hashCode());
         final Object $accountId = this.getAccountId();
         result = result * PRIME + ($accountId == null ? 43 : $accountId.hashCode());
+        final Object $account = this.getAccount();
+        result = result * PRIME + ($account == null ? 43 : $account.hashCode());
         return result;
     }
 
@@ -151,7 +169,7 @@ public class ChatRoomRecord implements Serializable{
     }
 
     public String toString() {
-        return "ChatRoomRecord(chatRoomRecordId=" + this.getChatRoomRecordId() + ", content=" + this.getContent() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", chatRoomId=" + this.getChatRoomId() + ", accountId=" + this.getAccountId() + ")";
+        return "ChatRoomRecord(chatRoomRecordId=" + this.getChatRoomRecordId() + ", content=" + this.getContent() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", chatRoomId=" + this.getChatRoomId() + ", accountId=" + this.getAccountId() + ", account=" + this.getAccount() + ")";
     }
 }
 

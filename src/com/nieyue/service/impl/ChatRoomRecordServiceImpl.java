@@ -1,20 +1,24 @@
 package com.nieyue.service.impl;
 
+import com.nieyue.bean.Account;
 import com.nieyue.bean.ChatRoomRecord;
 import com.nieyue.dao.ChatRoomRecordDao;
+import com.nieyue.service.AccountService;
 import com.nieyue.service.ChatRoomRecordService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public class ChatRoomRecordServiceImpl implements ChatRoomRecordService{
-	@Resource
+	@Autowired
 	ChatRoomRecordDao chatRoomRecordDao;
+	@Autowired
+	AccountService accountService;
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public boolean add(ChatRoomRecord chatRoomRecord) {
@@ -40,6 +44,10 @@ public class ChatRoomRecordServiceImpl implements ChatRoomRecordService{
 	@Override
 	public ChatRoomRecord load(Integer chatRoomRecordId) {
 		ChatRoomRecord r = chatRoomRecordDao.load(chatRoomRecordId);
+		if(r!=null){
+			Account account = accountService.load(r.getAccountId());
+			r.setAccount(account);
+		}
 		return r;
 	}
 
@@ -59,6 +67,12 @@ public class ChatRoomRecordServiceImpl implements ChatRoomRecordService{
 			pageSize=0;//没有数据
 		}
 		List<ChatRoomRecord> l = chatRoomRecordDao.list(chatRoomId,accountId,pageNum-1, pageSize, orderName, orderWay);
+		l.forEach(r->{
+			if(r!=null){
+				Account account = accountService.load(r.getAccountId());
+				r.setAccount(account);
+			}
+		});
 		return l;
 	}
 

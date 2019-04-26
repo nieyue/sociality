@@ -17,7 +17,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +66,39 @@ public class ChatRoomController {
 			}
 	}
 	/**
+	 * 根据聊天房成员查询所有聊天房列表
+	 * @return
+	 */
+	@ApiOperation(value = "根据聊天房成员查询所有聊天房列表", notes = "根据聊天房成员查询所有聊天房列表")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name="accountId",value="成员账户id外键",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="pageNum",value="页头数位",dataType="int", paramType = "query",defaultValue="1"),
+			@ApiImplicitParam(name="pageSize",value="每页数目",dataType="int", paramType = "query",defaultValue="10"),
+			@ApiImplicitParam(name="orderName",value="排序字段",dataType="string", paramType = "query",defaultValue="update_date"),
+			@ApiImplicitParam(name="orderWay",value="排序方式",dataType="string", paramType = "query",defaultValue="desc")
+	})
+	@RequestMapping(value = "/chatRoomList", method = {RequestMethod.GET,RequestMethod.POST})
+	public @ResponseBody StateResultList<List<ChatRoom>> chatRoomList(
+			@RequestParam(value="accountId",required=false)Integer accountId,
+			@RequestParam(value="pageNum",defaultValue="1",required=false)int pageNum,
+			@RequestParam(value="pageSize",defaultValue="10",required=false) int pageSize,
+			@RequestParam(value="orderName",required=false,defaultValue="update_date") String orderName,
+			@RequestParam(value="orderWay",required=false,defaultValue="desc") String orderWay)  {
+		List<ChatRoom> chatRoomList = new ArrayList<ChatRoom>();
+		List<ChatRoomMember> list = chatRoomMemberService.list(null, accountId, pageNum, pageSize, orderName, orderWay);
+		list.forEach(e->{
+			if(e!=null){
+				ChatRoom chatRoom = chatRoomService.load(e.getChatRoomId());
+				chatRoomList.add(chatRoom);
+			}
+		});
+		if(chatRoomList.size()>0){
+			return ResultUtil.getSlefSRSuccessList(chatRoomList);
+		}else{
+			throw new NotAnymoreException();//没有更多
+		}
+	}
+	/**
 	 * 聊天房修改
 	 * @return
 	 */
@@ -102,7 +134,7 @@ public class ChatRoomController {
 	 */
 	@ApiOperation(value = "创建聊天房", notes = "创建聊天房")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name="type",value="类型，1普通房，2语音房，3电影房",dataType="int", paramType = "query",required = true),
+			@ApiImplicitParam(name="type",value="类型，1私聊，2普通房，3语音房，4电影房",dataType="int", paramType = "query",required = true),
 			@ApiImplicitParam(name="name",value="名称",dataType="string", paramType = "query"),
 			@ApiImplicitParam(name="url",value="语音或电影url",dataType="string", paramType = "query"),
 			@ApiImplicitParam(name="accountId",value="创建账户id",dataType="int", paramType = "query",required = true),
@@ -127,7 +159,7 @@ public class ChatRoomController {
 		chatRoom.setUrl(url);
 		chatRoom.setAccountId(accountId);
 		//判断是否已经存在,只有两人聊天才判断
-		if(aids.length==2){
+		if(type==1){
 			//获取非发起人的账户id
 			Integer accountId2 = null;
 			for (int i = 0; i <aids.length ; i++) {

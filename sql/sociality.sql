@@ -88,7 +88,7 @@ INDEX INDEX_ACCOUNTID (account_id) USING BTREE
 #创建聊天房表
 CREATE TABLE chat_room_tb(
 chat_room_id int(11) NOT NULL AUTO_INCREMENT COMMENT '聊天房id',
-type tinyint(4) COMMENT '类型，1普通房，2语音房，3电影房',
+type tinyint(4) COMMENT '类型，1私聊，2普通房，3语音房，4电影房',
 name varchar(255) COMMENT '名称',
 url varchar(255) COMMENT '语音或电影url',
 create_date datetime COMMENT '创建时间',

@@ -8,7 +8,7 @@
     <meta http-equiv="Cache" content="no-cache">
     <meta name="viewport"
           content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
-    <title>好友信息</title>
+    <title>聊天</title>
     <link href="resources/css/font-awesome.min.css" rel="stylesheet">
     <link href="resources/css/datetime.css" rel="stylesheet">
     <link rel="stylesheet" href="resources/css/base.css">
@@ -39,21 +39,74 @@
         .textarea{
             text-align: left;
             padding-left:12px;
-            min-height: 32px;
+            min-height: 28px;
             max-height: 300px;
             _height: 120px;
             margin-left: auto;
             margin-right: auto;
             outline: 0;
             border: 1px solid #a0b3d6;
-            font-size: 12px;
-            line-height: 32px;
+            font-size: 16px;
+            line-height: 28px;
+            padding-top:0px;
             word-wrap: break-word;
             overflow-x: hidden;
             overflow-y: auto;
-
             border-color: rgba(82, 168, 236, 0.8);
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(82, 168, 236, 0.6);
+        }
+        /**
+        **左边聊天框
+         */
+        .chat-content-leftwrap {
+            position: relative;
+            width:auto;
+            background: #fff;
+            padding:5px;
+            border-radius: 5px;
+            margin-left: 10px;
+            word-break: break-word;
+            padding: 5px;
+            margin-top:2px;
+            font-size:1rem;
+        }
+        .chat-content-leftwrap::after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 8px solid transparent;
+            border-right-color: #fff;
+            top: 8px;
+            left: -14px;
+        }
+        /**
+       **右边聊天框
+        */
+        .chat-content-rightwrap {
+            position: relative;
+            width:auto;
+            background: green;
+            color:#fff;
+            padding:5px;
+            border-radius: 5px;
+            margin-left: 10px;
+            word-break: break-word;
+            padding: 5px;
+            margin-top:2px;
+            font-size:1rem;
+        }
+        .chat-content-rightwrap::after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 8px solid transparent;
+            border-left-color: green;
+            top: 8px;
+            right: -14px;
         }
     </style>
 </head>
@@ -63,29 +116,53 @@
             社交网络
         </span>
     <span class="nologin" style="display:none;cursor:pointer;position:absolute;right:68px;top:4px;color:#fff;background-color:red;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gologin()">登陆</span>
+    <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:238px;top:4px;color:#fff;background-color:#f45fff;width:58px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('chat_room',true)">聊天房</span>
     <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:188px;top:4px;color:#fff;background-color:#2732ff;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('friend',true)">好友</span>
     <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:118px;top:4px;color:#fff;background-color:#9fff2d;width:58px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('circle',true)">时光圈</span>
     <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:68px;top:4px;color:#fff;background-color:#c51fff;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('user',true)">我的</span>
     <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:22px;top:4px;color:#000;background-color:#ececec;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.loginout()">登出</span>
 </div>
 <div class="common-wrap"style="padding:38px 0 0 0;">
-    <div style="background-color:#f8f8f8f8;position:absolute;top:38px;left:0;width:100%;border-bottom:1px solid #ccc;height:38px;z-index:10;">
+    <div style="background-color:#ececec;position:absolute;top:38px;left:0;width:100%;border-bottom:1px solid #ccc;height:38px;z-index:10;">
         <span style="cursor:pointer;float:left;margin-top:8px;" onclick="business.goback()"><</span>
         <span id="name" style="display:inline-block;margin-top:8px;">名称</span>
     </div>
 
-    <div style="background-color:#f8f8f8f8;width:100%;height:100%;position:absolute;top:0;left:0;box-sizing: border-box;padding:76px 0 38px 0;z-index:9; ">
-       <div>
+    <div id="chatRoomRecordWrap" style="background-color:#ececec;width:100%;height:100%;position:absolute;top:0;left:0;box-sizing: border-box;padding:76px 0 38px 0;z-index:9;overflow: auto; ">
+       <div id="chatRoomRecordList">
+           <!--<div style="padding:5px;cursor:pointer;text-align:left;">
+               <div style="display: inline-block;width:16%;vertical-align:top;">
+                   <img src="resources/img/head_2.png" style="width:100%;" alt="">
+               </div>
+               <div style="display: inline-block;width:70%;">
+                   <div style="display: inline-block;width:auto;max-width:100%;">
+                       <div style="color:#558eff;text-indent:1rem;">标题</div>
+                       <div class="chat-content-leftwrap">内容</div>
+                   </div>
+               </div>
+           </div>
 
+           <div style="padding:5px;cursor:pointer;text-align:right;">
+               <div style="display: inline-block;width:70%;margin-left:12%;">
+                   <div style="display: inline-block;width:auto;max-width:100%;">
+                       <div style="color:#558eff;text-indent:1rem;">标题2</div>
+                       <div class="chat-content-rightwrap" style="text-align:left;">内容2</div>
+                   </div>
+               </div>
+               <div style="display: inline-block;width:16%;vertical-align:top;">
+                   <img src="resources/img/head_2.png" style="width:100%;" alt="">
+               </div>
+           </div>-->
        </div>
     </div>
 
-    <div style="position:absolute;bottom:0;left:0;width:100%;min-height:38px;height:auto;border-top:1px solid #ccc;z-index:10;">
-        <div style="width:calc(100% - 92px);min-height:32px;height:auto;display: inline-block;margin-top:6px;">
+    <div id="messageWrap" style="background-color:#ececec;position:absolute;bottom:0;left:0;width:100%;min-height:38px;height:auto;border-top:1px solid #ccc;z-index:10;">
+        <div style="width:calc(100% - 92px);min-height:28px;height:auto;display: inline-block;margin-top:6px;">
             <div class="textarea" id="content" contenteditable="true"></div>
         </div>
-        <span onclick="business.sendMessage()" style="vertical-align:top;display: inline-block;cursor:pointer;height:32px;width:72px;background-color:#2732ff;color:#fff;line-height: 32px;border-radius:3px;margin-top:6px;">发送</span>
+        <span onclick="business.sendMessage()" style="vertical-align:top;display: inline-block;cursor:pointer;height:28px;width:72px;background-color:#2732ff;color:#fff;line-height: 28px;border-radius:3px;margin-top:6px;">发送</span>
     </div>
+
 </div>
 
 
@@ -94,6 +171,11 @@
 <script src="resources/js/datetime.js"></script>
 <script src="resources/js/base.js"></script>
 <script>
+    //计算chatRoomRecordWrap
+    setInterval(function(){
+        $("#chatRoomRecordWrap").css("padding-bottom",$("#messageWrap").height())
+    },20)
+
     //socket
         var wsPath=wsPath();
         function wsPath(){
@@ -135,12 +217,47 @@
                 if(e.data==""){
                     return false;
                 }
-                var socketMSG=JSON.parse(e.data);
-                //socketMSG.MSG 我这里后端传的是个json 所以这么写的
-                console.log("socketMSG")
-                console.log(socketMSG)
-                if(socketMSG.MSG!=undefined){
+                var chatRoomRecord=JSON.parse(e.data);
+                //chatRoomRecord 我这里后端传的是个json 所以这么写的
+
+                if(chatRoomRecord!=undefined){
                     //e.data是获取后端传送的消息，我这里的操作时把信息拿出来放到消息栏并提示， 这里根据自己的需求修改吧。
+                    console.log("chatRoomRecord")
+                    console.log(chatRoomRecord)
+                    if(chatRoomRecord.chatRoomId==business.getQueryString("chatRoomId")){
+                        var html="";
+                        var icon=chatRoomRecord.account.icon?chatRoomRecord.account.icon:'resources/img/head_2.png';
+                        if(chatRoomRecord.accountId==JSON.parse(localStorage.getItem("account")).accountId){
+                           //自己发的消息，在右边
+                           html='<div style="padding:5px;cursor:pointer;text-align:right;">\n' +
+                               '               <div style="display: inline-block;width:70%;margin-left:12%;">\n' +
+                               '                   <div style="display: inline-block;width:auto;max-width:100%;">\n' +
+                               '                       <div style="color:#558eff;text-indent:1rem;">'+chatRoomRecord.account.realname+'</div>\n' +
+                               '                       <div class="chat-content-rightwrap" style="text-align:left;">'+chatRoomRecord.content+'</div>\n' +
+                               '                   </div>\n' +
+                               '               </div>\n' +
+                               '               <div style="display: inline-block;width:16%;vertical-align:top;">\n' +
+                               '                   <img src="'+icon+'" style="width:100%;" alt="">\n' +
+                               '               </div>\n' +
+                               '           </div>';
+                        }else{
+                            //其他人发的消息，在左边
+                            html='<div style="padding:5px;cursor:pointer;text-align:left;">\n' +
+                                '               <div style="display: inline-block;width:16%;vertical-align:top;">\n' +
+                                '                   <img src="'+icon+'" style="width:100%;" alt="">\n' +
+                                '               </div>\n' +
+                                '               <div style="display: inline-block;width:70%;">\n' +
+                                '                   <div style="display: inline-block;width:auto;max-width:100%;">\n' +
+                                '                       <div style="color:#558eff;text-indent:1rem;">'+chatRoomRecord.account.realname+'</div>\n' +
+                                '                       <div class="chat-content-leftwrap">'+chatRoomRecord.content+'</div>\n' +
+                                '                   </div>\n' +
+                                '               </div>\n' +
+                                '           </div>';
+                        }
+                        $("#chatRoomRecordList").append(html)
+                        //滑动到底部
+                        $("#chatRoomRecordWrap").scrollTop($("#chatRoomRecordWrap")[0].scrollHeight);
+                    }
                 }
             };
             sock.onerror = function (e) {
@@ -179,7 +296,7 @@
             start: function(){
                 var _this = this;
                 this.timeoutObj = setTimeout(function(){
-                    sock.send("");
+                    sock.send("{}");
                     _this.serverTimeoutObj = setTimeout(function(){
                         console.log(" start-sock ..close")
                         sock.close();
@@ -251,37 +368,7 @@
             "content":content
         };
         sock.send(JSON.stringify(message))
-        return ;
-        business.ajax({
-            url:'/chatRoom/sendMessage',
-            data:{
-                chatRoomId:business.getQueryString("chatRoomId"),
-                content:content
-            },
-            success:function(data){
-                var chatRoomMemberList=data.data;
-                if(chatRoomMemberList.length==1){
-                    business.myLoadingToast("不能和自己聊天")
-                    return;
-                }
-                if(chatRoomMemberList.length>2){
-                    $("#name").text(chatRoom.name)
-                }else{
-                    for (var i = 0; i < chatRoomMemberList.length; i++) {
-                        var chatRoomMember=chatRoomMemberList[i];
-                        if(chatRoomMember.accountId!=JSON.parse(localStorage.getItem("account")).accountId){
-                            $("#name").text(chatRoomMember.account.realname)
-                        }
-                    }
-                }
-                console.log(chatRoomMemberList)
-                $("#chatContent").html("");
-            },
-            fail:function(data){
-                business.myLoadingToast(data.msg)
-                $("#chatContent").html("");
-            }
-        })
+        $("#content").html("");
     }
 </script>
 </body>

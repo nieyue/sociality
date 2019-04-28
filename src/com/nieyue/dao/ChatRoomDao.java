@@ -22,10 +22,14 @@ public interface ChatRoomDao {
     /** 装载 */
     public ChatRoom load(Integer chatRoomId);
     /**总共数目 */
-    public int count(@Param("accountId") Integer accountId);
+    public int count(
+            @Param("accountId") Integer accountId,
+            @Param("type") Integer type
+    );
     /** 列表 */
     public List<ChatRoom> list(
             @Param("accountId") Integer accountId,
+            @Param("type") Integer type,
             @Param("pageNum") int pageNum,
             @Param("pageSize") int pageSize,
             @Param("orderName") String orderName,

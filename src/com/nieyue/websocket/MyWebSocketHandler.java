@@ -68,7 +68,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
 		chatRoomRecord.setChatRoomId(object.getInt("chatRoomId"));
 		chatRoomRecord.setContent(object.getString("content"));
 		//获取聊天房里的所有成员
-		List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(chatRoomRecord.getChatRoomId(), null, 1, Integer.MAX_VALUE, "chat_room_member_id", "asc");
+		List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(chatRoomRecord.getChatRoomId(), null,null, 1, Integer.MAX_VALUE, "chat_room_member_id", "asc");
 		//获取发送端的账户
 		for (int i = 0; i < chatRoomMemberList.size(); i++) {
 			if(chatRoomRecord.getAccountId().equals(chatRoomMemberList.get(i).getAccountId())){

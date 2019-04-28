@@ -40,6 +40,7 @@ public class ChatRoomMemberController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name="chatRoomId",value="聊天房id外键",dataType="int", paramType = "query"),
 			@ApiImplicitParam(name="accountId",value="账户id外键",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="type",value="类型，1私聊，2普通房，3语音房，4电影房",dataType="int", paramType = "query"),
 	  		@ApiImplicitParam(name="pageNum",value="页头数位",dataType="int", paramType = "query",defaultValue="1"),
 	  		@ApiImplicitParam(name="pageSize",value="每页数目",dataType="int", paramType = "query",defaultValue="10"),
 	  		@ApiImplicitParam(name="orderName",value="排序字段",dataType="string", paramType = "query",defaultValue="update_date"),
@@ -49,12 +50,13 @@ public class ChatRoomMemberController {
 	public @ResponseBody StateResultList<List<ChatRoomMember>> list(
 			@RequestParam(value="chatRoomId",required=false)Integer chatRoomId,
 			@RequestParam(value="accountId",required=false)Integer accountId,
+			@RequestParam(value="type",required=false)Integer type,
 			@RequestParam(value="pageNum",defaultValue="1",required=false)int pageNum,
 			@RequestParam(value="pageSize",defaultValue="10",required=false) int pageSize,
 			@RequestParam(value="orderName",required=false,defaultValue="update_date") String orderName,
 			@RequestParam(value="orderWay",required=false,defaultValue="desc") String orderWay)  {
 			List<ChatRoomMember> list = new ArrayList<ChatRoomMember>();
-			list= chatRoomMemberService.list(chatRoomId,accountId,pageNum, pageSize, orderName, orderWay);
+			list= chatRoomMemberService.list(chatRoomId,accountId,type,pageNum, pageSize, orderName, orderWay);
 			if(list.size()>0){
 				return ResultUtil.getSlefSRSuccessList(list);
 			}else{
@@ -119,13 +121,15 @@ public class ChatRoomMemberController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name="chatRoomId",value="聊天房id外键",dataType="int", paramType = "query"),
 			@ApiImplicitParam(name="accountId",value="账户id外键",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="type",value="类型，1私聊，2普通房，3语音房，4电影房",dataType="int", paramType = "query"),
 	})
 	@RequestMapping(value = "/count", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Integer>> count(
 			@RequestParam(value="chatRoomId",required=false)Integer chatRoomId,
 			@RequestParam(value="accountId",required=false)Integer accountId,
+			@RequestParam(value="type",required=false)Integer type,
 			HttpSession session)  {
-		Integer count = chatRoomMemberService.count(chatRoomId,accountId);
+		Integer count = chatRoomMemberService.count(chatRoomId,accountId,type);
 			List<Integer> list = new ArrayList<Integer>();
 			list.add(count);
 			return ResultUtil.getSlefSRSuccessList(list);

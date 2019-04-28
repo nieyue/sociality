@@ -51,20 +51,20 @@ public class ChatRoomServiceImpl implements ChatRoomService{
 		if(r!=null){
 			Account account = accountService.load(r.getAccountId());
 			r.setAccount(account);
-			List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(chatRoomId, null, 1, Integer.MAX_VALUE, "chat_room_member_id", "desc");
+			List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(chatRoomId, null,null, 1, Integer.MAX_VALUE, "chat_room_member_id", "desc");
 			r.setChatRoomMemberList(chatRoomMemberList);
 		}
 		return r;
 	}
 
 	@Override
-	public int count(Integer accountId) {
-		int c = chatRoomDao.count(accountId);
+	public int count(Integer accountId,Integer type) {
+		int c = chatRoomDao.count(accountId,type);
 		return c;
 	}
 
 	@Override
-	public List<ChatRoom> list(Integer accountId,int pageNum, int pageSize,
+	public List<ChatRoom> list(Integer accountId,Integer type,int pageNum, int pageSize,
 			String orderName, String orderWay) {
 		if(pageNum<1){
 			pageNum=1;
@@ -72,12 +72,12 @@ public class ChatRoomServiceImpl implements ChatRoomService{
 		if(pageSize<1){
 			pageSize=0;//没有数据
 		}
-		List<ChatRoom> l = chatRoomDao.list(accountId,pageNum-1, pageSize, orderName, orderWay);
+		List<ChatRoom> l = chatRoomDao.list(accountId,type,pageNum-1, pageSize, orderName, orderWay);
 		l.forEach(r->{
 			if(r!=null){
 				Account account = accountService.load(r.getAccountId());
 				r.setAccount(account);
-				List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(r.getChatRoomId(), null, 1, Integer.MAX_VALUE, "chat_room_member_id", "desc");
+				List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(r.getChatRoomId(), null,null, 1, Integer.MAX_VALUE, "chat_room_member_id", "desc");
 				r.setChatRoomMemberList(chatRoomMemberList);
 			}
 		});

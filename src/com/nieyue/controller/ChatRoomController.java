@@ -45,6 +45,7 @@ public class ChatRoomController {
 	@ApiOperation(value = "聊天房列表", notes = "聊天房分页浏览")
 	@ApiImplicitParams({
 	  @ApiImplicitParam(name="accountId",value="账户id外键",dataType="int", paramType = "query"),
+	  @ApiImplicitParam(name="type",value="类型，1私聊，2普通房，3语音房，4电影房",dataType="int", paramType = "query"),
 	  @ApiImplicitParam(name="pageNum",value="页头数位",dataType="int", paramType = "query",defaultValue="1"),
 	  @ApiImplicitParam(name="pageSize",value="每页数目",dataType="int", paramType = "query",defaultValue="10"),
 	  @ApiImplicitParam(name="orderName",value="排序字段",dataType="string", paramType = "query",defaultValue="update_date"),
@@ -53,12 +54,13 @@ public class ChatRoomController {
 	@RequestMapping(value = "/list", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<ChatRoom>> list(
 			@RequestParam(value="accountId",required=false)Integer accountId,
+			@RequestParam(value="type",required=false)Integer type,
 			@RequestParam(value="pageNum",defaultValue="1",required=false)int pageNum,
 			@RequestParam(value="pageSize",defaultValue="10",required=false) int pageSize,
 			@RequestParam(value="orderName",required=false,defaultValue="update_date") String orderName,
 			@RequestParam(value="orderWay",required=false,defaultValue="desc") String orderWay)  {
 			List<ChatRoom> list = new ArrayList<ChatRoom>();
-			list= chatRoomService.list(accountId,pageNum, pageSize, orderName, orderWay);
+			list= chatRoomService.list(accountId,type,pageNum, pageSize, orderName, orderWay);
 			if(list.size()>0){
 				return ResultUtil.getSlefSRSuccessList(list);
 			}else{
@@ -72,6 +74,7 @@ public class ChatRoomController {
 	@ApiOperation(value = "根据聊天房成员查询所有聊天房列表", notes = "根据聊天房成员查询所有聊天房列表")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name="accountId",value="成员账户id外键",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="type",value="类型，1私聊，2普通房，3语音房，4电影房",dataType="int", paramType = "query"),
 			@ApiImplicitParam(name="pageNum",value="页头数位",dataType="int", paramType = "query",defaultValue="1"),
 			@ApiImplicitParam(name="pageSize",value="每页数目",dataType="int", paramType = "query",defaultValue="10"),
 			@ApiImplicitParam(name="orderName",value="排序字段",dataType="string", paramType = "query",defaultValue="update_date"),
@@ -80,16 +83,25 @@ public class ChatRoomController {
 	@RequestMapping(value = "/chatRoomList", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<ChatRoom>> chatRoomList(
 			@RequestParam(value="accountId",required=false)Integer accountId,
+			@RequestParam(value="type",required=false)Integer type,
 			@RequestParam(value="pageNum",defaultValue="1",required=false)int pageNum,
 			@RequestParam(value="pageSize",defaultValue="10",required=false) int pageSize,
 			@RequestParam(value="orderName",required=false,defaultValue="update_date") String orderName,
 			@RequestParam(value="orderWay",required=false,defaultValue="desc") String orderWay)  {
 		List<ChatRoom> chatRoomList = new ArrayList<ChatRoom>();
-		List<ChatRoomMember> list = chatRoomMemberService.list(null, accountId, pageNum, pageSize, orderName, orderWay);
+		List<ChatRoomMember> list = chatRoomMemberService.list(null, accountId, type,pageNum, pageSize, orderName, orderWay);
 		list.forEach(e->{
 			if(e!=null){
 				ChatRoom chatRoom = chatRoomService.load(e.getChatRoomId());
-				chatRoomList.add(chatRoom);
+				//chatRoomList.add(chatRoom);
+				if(type!=null ){
+					if(chatRoom.getType().equals(type)){
+						chatRoomList.add(chatRoom);
+					}
+				}else{
+					chatRoomList.add(chatRoom);
+				}
+
 			}
 		});
 		if(chatRoomList.size()>0){
@@ -170,11 +182,11 @@ public class ChatRoomController {
 				}
 			}
 			//先查询发起人所有聊天房成员
-			List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(null, accountId, 1, Integer.MAX_VALUE, "chat_room_member_id", "desc");
+			List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(null, accountId,type, 1, Integer.MAX_VALUE, "chat_room_member_id", "desc");
 			int number=0;
 			for (int i = 0; i < chatRoomMemberList.size(); i++) {
 				ChatRoomMember chatRoomMember = chatRoomMemberList.get(i);
-				number = chatRoomMemberService.count(chatRoomMember.getChatRoomId(), accountId2);
+				number = chatRoomMemberService.count(chatRoomMember.getChatRoomId(), accountId2,type);
 				if(number>0){
 					ChatRoom cr = chatRoomService.load(chatRoomMember.getChatRoomId());
 					list.add(cr);
@@ -196,6 +208,7 @@ public class ChatRoomController {
 			chatRoomMember=new ChatRoomMember();
 			chatRoomMember.setAccountId(aid);
 			chatRoomMember.setChatRoomId(chatRoom.getChatRoomId());
+			chatRoomMember.setType(type);
 			chatRoomMemberService.add(chatRoomMember);
 		}
 		if(am){
@@ -225,18 +238,59 @@ public class ChatRoomController {
 		return ResultUtil.getSlefSRFailList(null);
 	}
 	/**
+	 * 加入聊天房
+	 * @return
+	 */
+	@ApiOperation(value = "加入聊天房", notes = "加入聊天房")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name="chatRoomId",value="聊天间Id",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="accountId",value="账户id",dataType="int", paramType = "query",required = true),
+	})
+	@RequestMapping(value = "/join", method = {RequestMethod.GET,RequestMethod.POST})
+	public @ResponseBody StateResultList<List<ChatRoom>> join(
+			@RequestParam("chatRoomId") Integer chatRoomId,
+			@RequestParam("accountId") Integer accountId,
+			HttpSession session) {
+		ChatRoom chatRoom = chatRoomService.load(chatRoomId);
+		if(chatRoom==null){
+			throw new CommonRollbackException("聊天房不存在");
+		}
+		List<ChatRoom> list = new ArrayList<>();
+			//先查询发起人所有聊天房成员
+			List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(chatRoom.getChatRoomId(), accountId,null, 1, Integer.MAX_VALUE, "chat_room_member_id", "desc");
+			//已经存在
+			if(chatRoomMemberList.size()>0){
+				list.add(chatRoom);
+				return ResultUtil.getSlefSRSuccessList(list);
+			}else{
+				ChatRoomMember chatRoomMember;
+				chatRoomMember=new ChatRoomMember();
+				chatRoomMember.setAccountId(accountId);
+				chatRoomMember.setChatRoomId(chatRoomId);
+				chatRoomMember.setType(chatRoom.getType());
+				boolean am = chatRoomMemberService.add(chatRoomMember);
+				if(am){
+					list.add(chatRoom);
+					return ResultUtil.getSlefSRSuccessList(list);
+				}
+			}
+		return ResultUtil.getSlefSRFailList(null);
+	}
+	/**
 	 * 聊天房浏览数量
 	 * @return
 	 */
 	@ApiOperation(value = "聊天房数量", notes = "聊天房数量查询")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name="accountId",value="账户id外键",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="type",value="类型，1私聊，2普通房，3语音房，4电影房",dataType="int", paramType = "query"),
 	})
 	@RequestMapping(value = "/count", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Integer>> count(
 			@RequestParam(value="accountId",required=false)Integer accountId,
+			@RequestParam(value="type",required=false)Integer type,
 			HttpSession session)  {
-		Integer count = chatRoomService.count(accountId);
+		Integer count = chatRoomService.count(accountId,type);
 			List<Integer> list = new ArrayList<Integer>();
 			list.add(count);
 			return ResultUtil.getSlefSRSuccessList(list);

@@ -15,7 +15,7 @@
             .friend-wrap{
                 box-sizing: border-box;
                 background-color:#fff;
-                padding:50px 2% 0 2%;
+                padding:50px 2% 50px 2%;
                 margin:auto;
                 width:750px;
                 height:100%;
@@ -124,13 +124,15 @@
               business.scrollFlush(business.getFriendApplyList);
           }
           //记录menu
-          localStorage.setItem('menu',value);
+          localStorage.setItem('friendMenu',value);
       }
+
       //消息列表（聊天房列表，根据聊天成员查询聊天房）
       business.getChatRoomList=function(){
           business.params.pageNum= (business.params.currentPage-1)*business.params.pageSize+1
           business.params.currentPage++;
           business.params.accountId=JSON.parse(localStorage.getItem("account")).accountId
+          business.params.type=1;//类型，1私聊，2普通房，3语音房，4电影房
           business.ajax({
               url:"/chatRoomMember/count",//查询聊天成员的数量
               data:business.params,
@@ -154,11 +156,11 @@
                                   //私聊
                                   for (var j = 0; j < chatRoomMemberList.length; j++) {
                                       //私聊，只显示对方
-                                      if(chatRoomMemberList[j].accountId!=JSON.parse(JSON.parse(localStorage.getItem("account")).accountId)){
+                                      if(chatRoomMemberList[j].accountId!=(JSON.parse(localStorage.getItem("account"))).accountId){
                                           icon=chatRoomMemberList[j].account.icon;
                                          // console.log(chatRoom.name)
                                          // console.log(chatRoomMemberList[j].account.realname)
-                                          name=chatRoom.name?chatRoom.name:chatRoomMemberList[j].account.realname
+                                          name=chatRoomMemberList[j].account.realname
                                       }
                                   }
                               }else{
@@ -185,7 +187,7 @@
                                   value="暂无"
                               }
                               business.isBottom=true;
-                              $("#chatRoomList").append('<div style="padding-top:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
+                              $("#chatRoomList").append('<div style="padding:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
 
                           }
                       }
@@ -246,7 +248,7 @@
                                 value="暂无"
                             }
                             business.isBottom=true;
-                            $("#friendList").append('<div style="padding-top:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
+                            $("#friendList").append('<div style="padding:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
 
                         }
                     }
@@ -319,7 +321,7 @@
                                   value="暂无"
                                 }
                               business.isBottom=true;
-                              $("#friendApplyList").append('<div style="padding-top:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
+                              $("#friendApplyList").append('<div style="padding:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
 
                           }
 
@@ -332,20 +334,6 @@
                   business.isBottom=true;
               }
           })
-      }
-
-      //滚动刷新
-      business.scrollFlush=function(callback){
-          $(window).scroll(function(){
-              if(!navigator.onLine){
-                  business.myLoadingToast("请检查网络！");
-                  return;
-              }
-              if(navigator.onLine&&!business.isBottom&& business.isScrollBottom(document)){
-                  console.log(111)
-                  callback()
-              }
-          });
       }
       //同意或拒绝添加好友
       business.agreeOrRefuse=function(friendApply,status){
@@ -374,9 +362,12 @@
       }
 
       //自动点击
-      if(localStorage.getItem('menu')){
-          business.menuClick(localStorage.getItem('menu'))
+      if(localStorage.getItem('friendMenu')){
+          business.menuClick(localStorage.getItem('friendMenu'))
+      }else{
+          business.menuClick("menu1");
       }
+
   </script>
   </body>
 </html>

@@ -20,11 +20,13 @@ public interface ChatRoomMemberService {
 	public ChatRoomMember load(Integer chatRoomMemberId);
 	/** 数目 */
 	public int count(Integer chatRoomId,
-					 Integer accountId);
+					 Integer accountId,
+					 Integer type);
 	/** 列表 */
 	public List<ChatRoomMember> list(
 			Integer chatRoomId,
 			Integer accountId,
+			Integer type,
             int pageNum,
             int pageSize,
             String orderName,

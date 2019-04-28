@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -288,11 +289,7 @@ public class AccountController {
 		}*/
 		List<Account> list = new ArrayList<Account>();
 		Account account = accountService.login(adminName, MyDESutil.getMD5(password),null);
-		if(SingletonHashMap.getInstance().get("accountId"+account.getAccountId())!=null){
-			throw new AccountIsLoginException();//账户已经登录
-		}else{
-			SingletonHashMap.getInstance().put("accountId"+account.getAccountId(),account.getAccountId());
-		}
+
 		if (ObjectUtils.isEmpty(account)) {
 			throw new AccountLoginException();//账户或密码错误
 		}
@@ -302,6 +299,14 @@ public class AccountController {
 			if(account!=null &&!account.equals("")){
 				list.add(account);
 				session.setAttribute("account",account);
+				//去重复登录
+				Map<String, Object> shm = SingletonHashMap.getInstance();
+				if(shm.get("accountId"+account.getAccountId())!=null
+						&&!(String.valueOf(shm.get("accountId"+account.getAccountId()))).equals(session.getId())){
+					throw new AccountIsLoginException();//账户已经登录
+				}else{
+					SingletonHashMap.getInstance().put("accountId"+account.getAccountId(),session.getId());
+				}
 				return ResultUtil.getSlefSRSuccessList(list);
 			}else{
 				throw new AccountLoginException();//登录异常

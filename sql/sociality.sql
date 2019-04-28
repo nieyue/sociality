@@ -95,19 +95,22 @@ create_date datetime COMMENT '创建时间',
 update_date datetime COMMENT '更新时间',
 account_id int(11) COMMENT '创建人id外键',
 PRIMARY KEY (chat_room_id),
-INDEX INDEX_ACCOUNTID (account_id) USING BTREE
+INDEX INDEX_ACCOUNTID (account_id) USING BTREE,
+INDEX INDEX_TYPE (type) USING BTREE
 )ENGINE = InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8 COMMENT='聊天房表';
 
 #创建聊天房成员表
 CREATE TABLE chat_room_member_tb(
 chat_room_member_id int(11) NOT NULL AUTO_INCREMENT COMMENT '聊天房成员id',
+type tinyint(4) COMMENT '类型，1私聊，2普通房，3语音房，4电影房',
 create_date datetime COMMENT '创建时间',
 update_date datetime COMMENT '更新时间',
 chat_room_id int(11) COMMENT '聊天房id外键',
 account_id int(11) COMMENT '账户id外键',
 PRIMARY KEY (chat_room_member_id),
 INDEX INDEX_CHATROOMID (chat_room_id) USING BTREE,
-INDEX INDEX_ACCOUNTID (account_id) USING BTREE
+INDEX INDEX_ACCOUNTID (account_id) USING BTREE,
+INDEX INDEX_TYPE (type) USING BTREE
 )ENGINE = InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8 COMMENT='聊天房成员表';
 
 #创建聊天房聊天记录表

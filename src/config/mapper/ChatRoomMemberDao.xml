@@ -8,6 +8,7 @@
    INSERT IGNORE INTO
    		  chat_room_member_tb
    		 (
+   		 type,
    		 create_date,
    		 update_date,
    		 chat_room_id,
@@ -15,6 +16,7 @@
    		 )
    VALUES
     	 (
+    	 #{type},
     	 #{createDate},
     	 #{updateDate},
     	 #{chatRoomId},
@@ -28,6 +30,9 @@
     <set>
 		<if test="createDate!=null">
 			create_date=#{createDate},
+		</if>
+		<if test="type!=null">
+			type=#{type},
 		</if>
 		<if test="updateDate!=null">
 			update_date=#{updateDate},
@@ -52,6 +57,7 @@
 <select id="load" parameterType="Integer" resultType="ChatRoomMember" >
 SELECT 
 		chat_room_member_id,
+		type,
     	create_date,
     	update_date,
     	 chat_room_id,
@@ -64,6 +70,7 @@ WHERE chat_room_member_id=#{chatRoomMemberId}
 <select id="list" resultType="ChatRoomMember">
         SELECT
 	chat_room_member_id,
+	type,
 		create_date,
 		update_date,
 		chat_room_id,
@@ -75,6 +82,9 @@ WHERE chat_room_member_id=#{chatRoomMemberId}
 		</if>
 		<if test="accountId!=null">
 			AND account_id=#{accountId}
+		</if>
+		<if test="type!=null">
+			AND type=#{type}
 		</if>
 		AND ${orderName}
 		<if test="orderWay=='asc'">
@@ -90,6 +100,9 @@ WHERE chat_room_member_id=#{chatRoomMemberId}
 				</if>
 				<if test="accountId!=null">
 					AND account_id=#{accountId}
+				</if>
+				<if test="type!=null">
+					AND type=#{type}
 				</if>
 			</where>
 			ORDER BY
@@ -114,6 +127,9 @@ WHERE chat_room_member_id=#{chatRoomMemberId}
 		</if>
 		<if test="accountId!=null">
 			AND account_id=#{accountId}
+		</if>
+		<if test="type!=null">
+			AND type=#{type}
 		</if>
 	</where>
 </select>   

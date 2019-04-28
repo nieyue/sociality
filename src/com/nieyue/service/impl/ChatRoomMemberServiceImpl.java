@@ -54,14 +54,15 @@ public class ChatRoomMemberServiceImpl implements ChatRoomMemberService{
 
 	@Override
 	public int count(Integer chatRoomId,
-					 Integer accountId) {
-		int c =chatRoomMemberDao.count(chatRoomId, accountId);
+					 Integer accountId,
+					 Integer type) {
+		int c =chatRoomMemberDao.count(chatRoomId, accountId,type);
 		return c;
 	}
 
 	@Override
 	public List<ChatRoomMember> list(Integer chatRoomId,
-									 Integer accountId,int pageNum, int pageSize,
+									 Integer accountId,Integer type,int pageNum, int pageSize,
 			String orderName, String orderWay) {
 		if(pageNum<1){
 			pageNum=1;
@@ -69,7 +70,7 @@ public class ChatRoomMemberServiceImpl implements ChatRoomMemberService{
 		if(pageSize<1){
 			pageSize=0;//没有数据
 		}
-		List<ChatRoomMember> l = chatRoomMemberDao.list(chatRoomId,accountId,pageNum-1, pageSize, orderName, orderWay);
+		List<ChatRoomMember> l = chatRoomMemberDao.list(chatRoomId,accountId,type,pageNum-1, pageSize, orderName, orderWay);
 		l.forEach(r->{
 			if(r!=null){
 				Account account = accountService.load(r.getAccountId());

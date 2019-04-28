@@ -19,10 +19,11 @@ public interface ChatRoomService {
 	/** 装载 */
 	public ChatRoom load(Integer chatRoomId);
 	/** 数目 */
-	public int count(Integer accountId);
+	public int count(Integer accountId,Integer type);
 	/** 列表 */
 	public List<ChatRoom> list(
             Integer accountId,
+            Integer type,
             int pageNum,
             int pageSize,
             String orderName,

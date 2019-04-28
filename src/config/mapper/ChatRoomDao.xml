@@ -87,6 +87,9 @@ WHERE chat_room_id=#{chatRoomId}
 		<if test="accountId!=null">
 			AND account_id=#{accountId}
 		</if>
+		<if test="type!=null">
+			AND type=#{type}
+		</if>
 		AND ${orderName}
 		<if test="orderWay=='asc'">
 		<![CDATA[>=]]>
@@ -98,6 +101,9 @@ WHERE chat_room_id=#{chatRoomId}
 			<where>
 				<if test="accountId!=null">
 					AND account_id=#{accountId}
+				</if>
+				<if test="type!=null">
+					AND type=#{type}
 				</if>
 			</where>
 			ORDER BY
@@ -119,6 +125,9 @@ WHERE chat_room_id=#{chatRoomId}
 	<where>
 		<if test="accountId!=null">
 			AND account_id=#{accountId}
+		</if>
+		<if test="type!=null">
+			AND type=#{type}
 		</if>
 	</where>
 </select>

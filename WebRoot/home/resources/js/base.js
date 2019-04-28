@@ -83,19 +83,21 @@ var business={
         //console.log(file.files)
         var photoExt=file.value.substr(file.value.lastIndexOf(".")).toLowerCase();// 获得文件后缀名
         // 判断格式
-        for (var i = 0; i < initPhotoExt.length; i++) {
-            if(photoExt==initPhotoExt[i])	{
-                isPhotoExt=true;
+        if(initPhotoExt[0]!="**"){
+            for (var i = 0; i < initPhotoExt.length; i++) {
+                if(photoExt==initPhotoExt[i])	{
+                    isPhotoExt=true;
+                }
             }
+            if(!isPhotoExt){
+                business.myLoadingToast("请上传后缀名为"+initPhotoExt.join("").replace(/\./g,"/")+"的文件!");
+                return false;
+            }
+            /* if(photoExt!='.jpg'&&photoExt!='.png'&&photoExt!='.gif'&&photoExt!='.apk'){
+                 myUtils.myLoadingToast("请上传后缀名为jpg/png/gif的照片!");
+                 return false;
+             }*/
         }
-        if(!isPhotoExt){
-            myUtils.myLoadingToast("请上传后缀名为"+initPhotoExt.join("").replace(/\./g,"/")+"的照片!");
-            return false;
-        }
-        /* if(photoExt!='.jpg'&&photoExt!='.png'&&photoExt!='.gif'&&photoExt!='.apk'){
-             myUtils.myLoadingToast("请上传后缀名为jpg/png/gif的照片!");
-             return false;
-         }*/
         var fileSize = 0;
         var isIE = /msie/i.test(navigator.userAgent) && !window.opera;
         if (isIE && !file.files) {
@@ -397,6 +399,19 @@ var business={
         $('#myTemplateNo').click(function(){
             $('#myTemplateDiv').remove();
             $('#myTemplate').remove();
+        });
+    },
+    //滚动刷新
+    scrollFlush:function(callback){
+        $(window).scroll(function(){
+            if(!navigator.onLine){
+                business.myLoadingToast("请检查网络！");
+                return;
+            }
+            if(navigator.onLine&&!business.isBottom&& business.isScrollBottom(document)){
+                console.log(111)
+                callback()
+            }
         });
     },
 	//返回

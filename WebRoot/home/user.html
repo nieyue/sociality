@@ -94,7 +94,7 @@
     ];
     $("#sid").text(account.sid);
     $("#realname").val(account.realname);
-    $("#birthDate").val(account.birthDate.substring(0,10));
+    $("#birthDate").val(account.birthDate?account.birthDate.substring(0,10):'');
     if(account.icon){
         $("#icon").attr("src",account.icon);
     }

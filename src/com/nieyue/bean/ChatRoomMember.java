@@ -22,6 +22,11 @@ public class ChatRoomMember implements Serializable{
     @ApiModelProperty(value="聊天房成员id")
     private Integer chatRoomMemberId;
     /**
+     * 类型，1私聊，2普通房，3语音房，4电影房
+     */
+    @ApiModelProperty(value="类型，1私聊，2普通房，3语音房，4电影房")
+    private Integer type;
+    /**
      * 创建时间
      */
     @ApiModelProperty(value="创建时间")
@@ -54,6 +59,10 @@ public class ChatRoomMember implements Serializable{
         return this.chatRoomMemberId;
     }
 
+    public Integer getType() {
+        return this.type;
+    }
+
     public Date getCreateDate() {
         return this.createDate;
     }
@@ -76,6 +85,10 @@ public class ChatRoomMember implements Serializable{
 
     public void setChatRoomMemberId(Integer chatRoomMemberId) {
         this.chatRoomMemberId = chatRoomMemberId;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 
     public void setCreateDate(Date createDate) {
@@ -107,6 +120,9 @@ public class ChatRoomMember implements Serializable{
         final Object other$chatRoomMemberId = other.getChatRoomMemberId();
         if (this$chatRoomMemberId == null ? other$chatRoomMemberId != null : !this$chatRoomMemberId.equals(other$chatRoomMemberId))
             return false;
+        final Object this$type = this.getType();
+        final Object other$type = other.getType();
+        if (this$type == null ? other$type != null : !this$type.equals(other$type)) return false;
         final Object this$createDate = this.getCreateDate();
         final Object other$createDate = other.getCreateDate();
         if (this$createDate == null ? other$createDate != null : !this$createDate.equals(other$createDate))
@@ -133,6 +149,8 @@ public class ChatRoomMember implements Serializable{
         int result = 1;
         final Object $chatRoomMemberId = this.getChatRoomMemberId();
         result = result * PRIME + ($chatRoomMemberId == null ? 43 : $chatRoomMemberId.hashCode());
+        final Object $type = this.getType();
+        result = result * PRIME + ($type == null ? 43 : $type.hashCode());
         final Object $createDate = this.getCreateDate();
         result = result * PRIME + ($createDate == null ? 43 : $createDate.hashCode());
         final Object $updateDate = this.getUpdateDate();
@@ -151,7 +169,7 @@ public class ChatRoomMember implements Serializable{
     }
 
     public String toString() {
-        return "ChatRoomMember(chatRoomMemberId=" + this.getChatRoomMemberId() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", chatRoomId=" + this.getChatRoomId() + ", accountId=" + this.getAccountId() + ", account=" + this.getAccount() + ")";
+        return "ChatRoomMember(chatRoomMemberId=" + this.getChatRoomMemberId() + ", type=" + this.getType() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", chatRoomId=" + this.getChatRoomId() + ", accountId=" + this.getAccountId() + ", account=" + this.getAccount() + ")";
     }
 }
 

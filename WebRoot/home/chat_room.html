@@ -13,7 +13,7 @@
     <link href="resources/css/datetime.css" rel="stylesheet">
     <link rel="stylesheet" href="resources/css/base.css">
     <style>
-        .user-wrap{
+        .chat-room-wrap{
             box-sizing: border-box;
             background-color:#fff;
             padding:50px 2% 50px 2%;
@@ -21,13 +21,14 @@
             height:100%;
             width:750px;
             text-align:center;
+            overflow: auto;
         }
         @media screen and (max-width:750px){
-            .user-wrap{
+            .chat-room-wrap{
                 width:100%;
             }
         }
-        .user-wrap-item{
+        .chat-room-wrap-item{
             margin:20px 0;
         }
     </style>
@@ -44,35 +45,69 @@
     <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:68px;top:4px;color:#fff;background-color:#c51fff;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.gonav('user',true)">我的</span>
     <span class="islogin" style="display:none;cursor:pointer;position:absolute;right:22px;top:4px;color:#000;background-color:#ececec;width:38px;height:30px;line-height: 30px;border-radius:3px;" onclick="business.loginout()">登出</span>
 </div>
-<div class="user-wrap">
-    <div>
-        聊天房
+<div class="chat-room-wrap">
+    <div style="text-align: center;font-size:2rem;">时光圈</div>
+    <div style="text-align:right;">
+        <a onclick="business.clickAddChatRoom()" style="cursor:pointer;color:#fff;background-color:#558eff;width:68px;height:68px;border:1px solid #558eff;padding:5px;border-radius: 100%;box-shadow:0 0 0 5px #ececec;">创建聊天房</a>
     </div>
-    <div class="user-wrap-item">
-        <span>类型</span>
-        <select id="type" style="height:30px;width:200px;">
-        </select>
-    </div>
-    <div  class="user-wrap-item">
-        <img id="icon" src="resources/img/head_2.png" style="width:80px;height: 80px;border-radius: 100%;"/>
-        <input type="file" id="iconInput"  style="display: none"/>
-    </div>
-    <div class="user-wrap-item">
-        <span>ID:</span>
-        <span id="sid"></span>
-    </div>
-    <div class="user-wrap-item">
-        <span>姓名</span>
-        <input type="text"  style="height:30px;width:200px;" id="realname"/>
-    </div>
-    <div class="user-wrap-item" >
-        <span>生日</span>
-        <input type="text"  style="height:30px;width:200px;" id="birthDate"/>
+    <div id="chatRoomAdd"  style="display: none;position:fixed;left:10%;top:10%;z-index:99;background-color:#fff;width:80%;height:80%;border:1px solid #ececec;box-shadow: 0 0 0 5px #ececec;border-radius: 20px;">
+        <div onclick="javascript:document.getElementById('chatRoomAdd').style.display='none';" style="border:1px solid blue;width:20px;height: 20px;color:#fff;background-color: blue;text-align: center;line-height: 20px;cursor:pointer;border-radius: 100%;float: right;">X</div>
+        <div style="height:50px;"></div>
+        <div>
+            创建聊天房
+        </div>
+        <div class="chat-room-wrap-item">
+            <span>类型</span>
+            <select id="type" style="height:30px;width:200px;">
+            </select>
+        </div>
+        <div class="chat-room-wrap-item">
+            <span>名称:</span>
+            <input id="name" type="text" style="height:30px;width:200px;"></input>
+        </div>
+
+        <div  class="chat-room-wrap-item" style="border:1px dashed #ececec;">
+            <span>上传（可以自行填入或点击上传）:</span>
+            <div class="chat-room-wrap-item">
+                <input id="url" type="text" style="height:30px;width:200px ;"placeholder="url链接"></input>
+            </div>
+            <!--<input type="text" id="urltext">-->
+            <span id="urlbottom" style="cursor:pointer;background-color: #8a9eff;border:5px;height: 38px;display: inline-block;color:#fff;width:200px;line-height: 38px;">点击上传视频/语音</span>
+            <input type="file" id="urlfile"  style="display: none"/>
+        </div>
+        <div  style="text-align: center;">
+            <span style="cursor:pointer;background-color: red;border:5px;height: 38px;display: inline-block;color:#fff;width:118px;line-height: 38px;" id="chatRoomSubmit">保存</span>
+        </div>
     </div>
 
-    <div  style="text-align: center;">
-        <span style="cursor:pointer;background-color: red;border:5px;height: 38px;display: inline-block;color:#fff;width:118px;line-height: 38px;" id="userSubmit">保存</span>
+    <!-- 语音房-->
+    <div style="padding:20px;" id="chatRoom3List">
+
     </div>
+    <!-- 语音房 end-->
+    <!-- 电影房 -->
+    <div style="padding:20px;display: none;" id="chatRoom4List">
+    </div>
+    <!-- 电影房 end-->
+
+    <!-- 固定栏-->
+    <div class="mer-footer" style="border-top:1px solid #ececec;">
+        <div class ="mer-footer-div" style="width:50%;left:0;color:red;">
+            <a id="menu1" onclick="business.menuClick(this.id)">
+                <i class="fa fa-file-sound-o nav-active" style="font-size:26px;" ></i>
+                <span class="nav-active">语音房</span>
+            </a>
+        </div>
+        <div class ="mer-footer-div" style="width:50%;left:50%">
+            <a id="menu2" onclick="business.menuClick(this.id)">
+                <i class="fa fa-caret-square-o-right" style="font-size:26px;"></i>
+                <span>电影房</span>
+            </a>
+        </div>
+
+    </div>
+    <!-- 固定栏 end-->
+
 </div>
 
 
@@ -85,11 +120,12 @@
     }else{
         account=JSON.parse(localStorage.getItem("account"));
     }
-    //初始化
+    //初始化类型，1私聊，2普通房，3语音房，4电影房
     business.self.typeList=[
-        {id:0,value:'未知'},
-        {id:1,value:'男'},
-        {id:2,value:'女'}
+       // {id:1,value:'私聊'},
+       // {id:2,value:'普通房'},
+        {id:3,value:'语音房'},
+        {id:4,value:'电影房'}
     ];
     var typeSelect="";
     for(var i=0;i<business.self.typeList.length;i++){
@@ -97,7 +133,17 @@
     }
     $("#type").html(typeSelect);
     $("#type").find("option[value = '0']").attr("selected","selected");
+    //点击聊天房
+    business.clickAddChatRoom=function(){
+        if($("#chatRoomAdd").css("display")=='none'){
+            // $("#circleAdd").show();
+            $("#chatRoomAdd").fadeIn();
+        }else{
+            //$("#circleAdd").hide();
+            $("#chatRoomAdd").fadeOut();
+        }
 
+    }
 
 
     /**
@@ -108,6 +154,7 @@
     business.commonFileUpload=function(changeElement,callback){
         $(changeElement).change(function(){
             business.fileUpload({
+                photoExt:["**"],
                 inputfile:$(changeElement),
                 ajaxObj:{
                     url:'/tool/file/add',
@@ -126,37 +173,235 @@
         })
     }
     //点击图像上传
-    $("#icon").click(function(){
-        $("#iconInput").click()
+    $("#urlbottom").click(function(){
+        $("#urlfile").click()
     })
-    business.commonFileUpload("#iconInput",function(url){
-        $("#icon").attr("src",url);
+    business.commonFileUpload("#urlfile",function(url){
+        $("#url").val(url);
     })
     /**
-     * 修改
+     * 创建聊天房
      * p.url 修改url
      * p.requestObject 请求参数对象
      * p.success 成功回调
      */
     //绑定
-    $(document).off("click","#userSubmit");
-    $(document).on("click","#userSubmit",function(){
-        business.updateAccount=account;//复制
-        business.updateAccount.realname=$("#realname").val();
-        business.updateAccount.sex=$("#sex option:selected").val();
-        business.updateAccount.birthDate=$("#birthDate").val()+" 00:00:00";
-        business.updateAccount.icon=$("#icon").attr("src");
-        delete business.updateAccount.role
+    $(document).off("click","#chatRoomSubmit");
+    $(document).on("click","#chatRoomSubmit",function(){
+        business.chatRoom={};
+        //成员
+        var members=[];
+        members.push(JSON.parse(localStorage.getItem("account")).accountId);
+        business.chatRoom.accountIds=members.toString();
+
+        business.chatRoom.accountId=account.accountId;//复制
+        business.chatRoom.type=$("#type option:selected").val();
+        business.chatRoom.name=$("#name").val();
+        business.chatRoom.url=$("#url").val();
         business.ajax({
-            url:"/account/update",
-            data:business.updateAccount,
+            url:"/chatRoom/create",
+            data:business.chatRoom,
             success:function(data){
                 //初始化
-                localStorage.setItem("account",JSON.stringify(data.data[0]))
-                business.myLoadingToast("修改成功")
+                business.myLoadingToast("创建成功")
+                setTimeout(function(){
+                    location.reload()
+                },1000)
             }
         });
     });
+
+
+
+    business.isBottom=false;
+    //点击底部导航
+    business.menuClick=function(value){
+        $(".mer-footer-div i,span").removeClass("nav-active");
+        $("#"+value).children().addClass("nav-active");
+        //重置参数
+        business.params=JSON.parse(JSON.stringify(business.originParams));
+        business.isBottom=false;
+        business.chatRoomList=[];
+        //menu1消息，menu2好友，menu3新朋友
+        if(value=='menu1'){
+            $("#chatRoom3List").show();
+            $("#chatRoom4List").hide();
+
+            $("#chatRoom3List").html("");
+            business.getChatRoom3List();
+            business.scrollFlush(business.getChatRoom3List);
+        }else if(value=='menu2'){
+            $("#chatRoom3List").hide();
+            $("#chatRoom4List").show();
+
+            $("#chatRoom4List").html("");
+            business.getChatRoom4List();
+            business.scrollFlush(business.getChatRoom4List);
+        }
+        //记录menu
+        localStorage.setItem('chatRoomMenu',value);
+    }
+    //消息列表
+    business.getChatRoom3List=function(){
+        business.params.pageNum= (business.params.currentPage-1)*business.params.pageSize+1
+        business.params.currentPage++;
+        //business.params.accountId=JSON.parse(localStorage.getItem("account")).accountId
+        business.params.type=3;//类型，1私聊，2普通房，3语音房，4电影房
+        business.ajax({
+            url:"/chatRoom/count",//查询聊天成员的数量
+            data:business.params,
+            success:function(d){
+                business.params.total=d.data[0];
+                business.params.pageSize=d.data[0];//设置全部查询
+                business.ajax({
+                    url:"/chatRoom/list",
+                    data:business.params,
+                    success:function(data){
+                        var html="";
+                        business.chatRoomList=data.data;
+                        for (var i = 0; i <business.chatRoomList.length ; i++) {
+                            var chatRoom=business.chatRoomList[i];
+                            var json=JSON.stringify(chatRoom);
+                            json=json.replace(/"/g,"'");
+                            // console.log(json)
+                            var chatRoomMemberList=chatRoom.chatRoomMemberList;
+                            var icon,realname,name;
+                                name=chatRoom.name;
+                                for (var j = 0; j < chatRoomMemberList.length; j++) {
+                                    //语音房
+                                    if(chatRoomMemberList[j].accountId==chatRoom.accountId) {
+                                        icon=chatRoomMemberList[j].account.icon;
+                                        realname=chatRoomMemberList[j].account.realname;
+                                    }
+                                }
+                            if(!icon){
+                                icon="resources/img/head_2.png";
+                            }
+                            html+='<div onclick="business.goChat('+json+')" style="border-bottom:1px solid #ececec;padding:5px;cursor:pointer;background-color: #fff;">\n' +
+                                '            <div style="display: inline-block;width:10%;vertical-align:middle;">\n' +
+                                '                <img src="'+icon+'" style="width:100%;" alt="">\n' +
+                                '            </div>\n' +
+                                '            <div style="display: inline-block;width:88%;text-align:left;">\n' +
+                                '                <div style="color:#000;">房间名称：<span style="color:#c51fff;">'+name+'</span></div>\n' +
+                                '                <div style="color:#000;">创建人：<span style="color:#ff7f40;">'+realname+'</span></div>\n' +
+                                '            </div>\n' +
+                                '        </div>';
+                        }
+                        $("#chatRoom3List").append(html);
+
+                    },
+                    fail:function(data){
+                        if(data.code==30002){
+                            var value=data.msg;
+                            if(!business.chatRoomList||business.chatRoomList.length==0){
+                                value="暂无"
+                            }
+                            business.isBottom=true;
+                            $("#chatRoom3List").append('<div style="padding:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
+
+                        }
+                    }
+                })
+
+
+            },
+            fail:function(){
+                business.isBottom=true;
+            }
+        })
+    }
+
+    //消息列表
+    business.getChatRoom4List=function(){
+        business.params.pageNum= (business.params.currentPage-1)*business.params.pageSize+1
+        business.params.currentPage++;
+       // business.params.accountId=JSON.parse(localStorage.getItem("account")).accountId
+        business.params.type=4;//类型，1私聊，2普通房，3语音房，4电影房
+        business.ajax({
+            url:"/chatRoom/count",//查询聊天成员的数量
+            data:business.params,
+            success:function(d){
+                business.params.total=d.data[0];
+                business.params.pageSize=d.data[0];//设置全部查询
+                business.ajax({
+                    url:"/chatRoom/list",
+                    data:business.params,
+                    success:function(data){
+                        var html="";
+                        business.chatRoomList=data.data;
+                        for (var i = 0; i <business.chatRoomList.length ; i++) {
+                            var chatRoom=business.chatRoomList[i];
+                            var json=JSON.stringify(chatRoom);
+                            json=json.replace(/"/g,"'");
+                            // console.log(json)
+                            var chatRoomMemberList=chatRoom.chatRoomMemberList;
+                            var icon,realname,name;
+                            name=chatRoom.name;
+                            for (var j = 0; j < chatRoomMemberList.length; j++) {
+                                //电影房
+                                if(chatRoomMemberList[j].accountId==chatRoom.accountId) {
+                                    icon=chatRoomMemberList[j].account.icon;
+                                    realname=chatRoomMemberList[j].account.realname;
+                                }
+                            }
+                            if(!icon){
+                                icon="resources/img/head_2.png";
+                            }
+                            html+='<div onclick="business.goChat('+json+')" style="border-bottom:1px solid #ececec;padding:5px;cursor:pointer;background-color: #fff;">\n' +
+                                '            <div style="display: inline-block;width:10%;vertical-align:middle;">\n' +
+                                '                <img src="'+icon+'" style="width:100%;" alt="">\n' +
+                                '            </div>\n' +
+                                '            <div style="display: inline-block;width:88%;text-align:left;">\n' +
+                                '                <div style="color:#000;">房间名称：<span style="color:#c51fff;">'+name+'</span></div>\n' +
+                                '                <div style="color:#000;">创建人：<span style="color:#ff7f40;">'+realname+'</span></div>\n' +
+                                '            </div>\n' +
+                                '        </div>';
+                        }
+                        $("#chatRoom4List").append(html);
+
+                    },
+                    fail:function(data){
+                        if(data.code==30002){
+                            var value=data.msg;
+                            if(!business.chatRoomList||business.chatRoomList.length==0){
+                                value="暂无"
+                            }
+                            business.isBottom=true;
+                            $("#chatRoom4List").append('<div style="padding:10px;text-align: center;background-color: #f2f3f4;">'+value+'</div>')
+
+                        }
+                    }
+                })
+
+
+            },
+            fail:function(){
+                business.isBottom=true;
+            }
+        })
+    }
+    //跳转聊天房
+    business.goChat=function(json){
+        business.ajax({
+            url:'/chatRoom/join',
+            data:{
+                accountId:JSON.parse(localStorage.getItem("account")).accountId,//加入人
+                chatRoomId:json.chatRoomId
+            },
+            success:function(data){
+                location.href="chat.html?chatRoomId="+data.data[0].chatRoomId;
+            },
+            fail:function(data){
+                business.myLoadingToast(data.msg)
+            }
+        })
+    }
+    //自动点击
+    if(localStorage.getItem('chatRoomMenu')){
+        business.menuClick(localStorage.getItem('chatRoomMenu'))
+    }else{
+        business.menuClick("menu1");
+    }
 </script>
 </body>
 </html>

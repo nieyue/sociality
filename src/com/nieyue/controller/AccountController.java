@@ -4,7 +4,6 @@ import com.nieyue.bean.Account;
 import com.nieyue.exception.*;
 import com.nieyue.service.AccountService;
 import com.nieyue.util.*;
-import com.nieyue.websocket.WebSocketMapService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -12,9 +11,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
-import org.springframework.web.socket.sockjs.client.WebSocketClientSockJsSession;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
@@ -289,7 +285,6 @@ public class AccountController {
 		}*/
 		List<Account> list = new ArrayList<Account>();
 		Account account = accountService.login(adminName, MyDESutil.getMD5(password),null);
-
 		if (ObjectUtils.isEmpty(account)) {
 			throw new AccountLoginException();//账户或密码错误
 		}
@@ -299,18 +294,70 @@ public class AccountController {
 			if(account!=null &&!account.equals("")){
 				list.add(account);
 				session.setAttribute("account",account);
-				//去重复登录
-				Map<String, Object> shm = SingletonHashMap.getInstance();
-				if(shm.get("accountId"+account.getAccountId())!=null
-						&&!(String.valueOf(shm.get("accountId"+account.getAccountId()))).equals(session.getId())){
-					throw new AccountIsLoginException();//账户已经登录
-				}else{
-					SingletonHashMap.getInstance().put("accountId"+account.getAccountId(),session.getId());
-				}
 				return ResultUtil.getSlefSRSuccessList(list);
 			}else{
 				throw new AccountLoginException();//登录异常
 			}
+	}
+
+	/**
+	 * 登录
+	 * @return
+	 */
+	@ApiOperation(value = "登录", notes = "登录")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name="adminName",value="账户",dataType="string", paramType = "query",required=true),
+			@ApiImplicitParam(name="password",value="密码",dataType="string", paramType = "query",required=true),
+			/*@ApiImplicitParam(name="verificationCode",value="图片验证码",dataType="string", paramType = "query",required=true)*/
+	})
+	@RequestMapping(value = "/weblogin", method = {RequestMethod.GET,RequestMethod.POST})
+	public  StateResultList<List<Account>> weblogin(
+			@RequestParam(value="adminName") String adminName,
+			@RequestParam(value="password") String password,
+			/*@RequestParam(value="verificationCode") String verificationCode,*/
+			HttpSession session)  {
+		//1代验证码
+		/*String ran= (String) session.getAttribute("verificationCode");
+		if(ran==null||!ran.equals(verificationCode)){
+			throw new VerifyCodeErrorException();//验证码
+		}*/
+		List<Account> list = new ArrayList<Account>();
+		Account account = accountService.login(adminName, MyDESutil.getMD5(password),null);
+		if (ObjectUtils.isEmpty(account)) {
+			throw new AccountLoginException();//账户或密码错误
+		}
+		if(account.getStatus().equals(1)){
+			throw new AccountLockException();//账户锁定
+		}
+		if(account!=null &&!account.equals("")){
+			list.add(account);
+			//设置在线
+			account.setStatus(3);
+			accountService.update(account);
+			session.setAttribute("account",account);
+			//去重复登录
+			Map<String, Object> shm = SingletonHashMap.getInstance();
+			Object sessionObj = shm.get("accountId" + account.getAccountId());
+			if(sessionObj!=null){
+				boolean islogin=false;
+				try{
+					((HttpSession)sessionObj).getAttribute("account");
+					islogin=true;
+				}catch (Exception e){
+					islogin=false;
+				}
+				if(islogin){
+					throw new AccountIsLoginException();//账户已经登录
+				}else{
+					SingletonHashMap.getInstance().put("accountId"+account.getAccountId(),session);
+				}
+			}else{
+				SingletonHashMap.getInstance().put("accountId"+account.getAccountId(),session);
+			}
+			return ResultUtil.getSlefSRSuccessList(list);
+		}else{
+			throw new AccountLoginException();//登录异常
+		}
 	}
 	/**
 	 * 是否登录
@@ -344,6 +391,10 @@ public class AccountController {
 			HttpSession session)  {
 		session.invalidate();
 		SingletonHashMap.getInstance().remove("accountId"+accountId);
+		Account account = accountService.load(accountId);
+		//设置离线
+		account.setStatus(0);
+		accountService.update(account);
 		return ResultUtil.getSlefSRSuccessList(null);
 	}
 

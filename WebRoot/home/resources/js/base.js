@@ -554,8 +554,8 @@ if(location.href.indexOf("login.html")<=-1
     //&&location.href.indexOf("register.html")<=-1
     //&&location.href.indexOf("forget.html")<=-1
     //&&location.href.indexOf("protocol.html")<=-1
-    &&location.href.indexOf("notice.html")<=-1
-    &&location.href.indexOf("index.html")<=-1
+   // &&location.href.indexOf("notice.html")<=-1
+   // &&location.href.indexOf("index.html")<=-1
 ){
     //1自动登录
     business.ajax({

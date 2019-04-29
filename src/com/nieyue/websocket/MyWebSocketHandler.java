@@ -1,6 +1,5 @@
 package com.nieyue.websocket;
 
-import com.nieyue.bean.ChatRoom;
 import com.nieyue.bean.ChatRoomMember;
 import com.nieyue.bean.ChatRoomRecord;
 import com.nieyue.service.ChatRoomMemberService;
@@ -59,38 +58,55 @@ public class MyWebSocketHandler implements WebSocketHandler {
 		//获取Socket通道中的数据
 		JSONObject object = JSONObject
 				.fromObject(webSocketMessage.getPayload().toString());
-		if(object.get("accountId")==null){
-			return;
-		}
 		//System.out.println(object.toString());
 		ChatRoomRecord chatRoomRecord = new ChatRoomRecord();
-		chatRoomRecord.setAccountId(object.getInt("accountId"));
 		chatRoomRecord.setChatRoomId(object.getInt("chatRoomId"));
 		chatRoomRecord.setContent(object.getString("content"));
-		//获取聊天房里的所有成员
-		List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(chatRoomRecord.getChatRoomId(), null,null, 1, Integer.MAX_VALUE, "chat_room_member_id", "asc");
-		//获取发送端的账户
-		for (int i = 0; i < chatRoomMemberList.size(); i++) {
-			if(chatRoomRecord.getAccountId().equals(chatRoomMemberList.get(i).getAccountId())){
-				chatRoomRecord.setAccount(chatRoomMemberList.get(i).getAccount());
+		try{
+			//获取历史数据(接受端数据)
+			chatRoomRecord.setToAccountId(object.getInt("toAccountId"));
+			int number = object.getInt("number");
+			if(number>0){
+				List<ChatRoomRecord> crrlist = chatRoomRecordService.list(chatRoomRecord.getChatRoomId(), null,chatRoomRecord.getToAccountId(), 1, number, "chat_room_record_id", "desc");
+				for (int i = crrlist.size()-1; i >=0 ; i--) {
+					ChatRoomRecord crr = crrlist.get(i);
+					// 给用户发送消息
+					sendMessageToUser(crr.getToAccountId(),
+							new TextMessage(JSONObject.fromObject(crr).toString()));
+				}
+				return;
 			}
+		}catch (Exception e){
+
 		}
-		//发给所有接受端
-		for (int i = 0; i < chatRoomMemberList.size(); i++) {
-			ChatRoomMember chatRoomMember = chatRoomMemberList.get(i);
-			ChatRoomRecord crr=new ChatRoomRecord();
-			crr.setContent(chatRoomRecord.getContent());
-			crr.setAccountId(chatRoomRecord.getAccountId());
-			crr.setChatRoomId(chatRoomRecord.getChatRoomId());
-			//发送方的账户
-			crr.setAccount(chatRoomRecord.getAccount());
-			//boolean b = chatRoomRecordService.add(crr);
-			//if(b){
-				// 给用户发送消息
-				sendMessageToUser(chatRoomMember.getAccountId(),
-						new TextMessage(JSONObject.fromObject(crr).toString()));
-			//}
-		}
+			chatRoomRecord.setFromAccountId(object.getInt("fromAccountId"));
+			//获取聊天房里的所有成员
+			List<ChatRoomMember> chatRoomMemberList = chatRoomMemberService.list(chatRoomRecord.getChatRoomId(), null,null, 1, Integer.MAX_VALUE, "chat_room_member_id", "asc");
+			//获取发送端的账户
+			for (int i = 0; i < chatRoomMemberList.size(); i++) {
+				if(chatRoomRecord.getFromAccountId().equals(chatRoomMemberList.get(i).getAccountId())){
+					chatRoomRecord.setFromAccount(chatRoomMemberList.get(i).getAccount());
+				}
+			}
+			//发给所有接受端
+			for (int i = 0; i < chatRoomMemberList.size(); i++) {
+				ChatRoomMember chatRoomMember = chatRoomMemberList.get(i);
+				ChatRoomRecord crr=new ChatRoomRecord();
+				crr.setContent(chatRoomRecord.getContent());
+				crr.setFromAccountId(chatRoomRecord.getFromAccountId());//发送端账户id
+				crr.setToAccountId(chatRoomMember.getAccountId());//接受端账户id
+				crr.setChatRoomId(chatRoomRecord.getChatRoomId());
+				//发送方的账户
+				crr.setFromAccount(chatRoomRecord.getFromAccount());
+				boolean b = chatRoomRecordService.add(crr);
+				if(b){
+					// 给用户发送消息
+					sendMessageToUser(chatRoomMember.getAccountId(),
+							new TextMessage(JSONObject.fromObject(crr).toString()));
+				}
+			}
+
+
 	}
 
 	public void handleTransportError(WebSocketSession webSocketSession,

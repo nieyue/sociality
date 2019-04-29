@@ -135,7 +135,7 @@
                 return;
             }
             $.ajax({
-                url:domainUrl+"/account/login",
+                url:domainUrl+"/account/weblogin",
                 data:$(".log_content form").serialize(),
                 type:"post",
                 success:function(result){

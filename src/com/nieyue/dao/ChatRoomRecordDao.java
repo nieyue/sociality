@@ -24,12 +24,14 @@ public interface ChatRoomRecordDao {
     /**总共数目 */
     public int count(
             @Param("chatRoomId") Integer chatRoomId,
-            @Param("accountId") Integer accountId
+            @Param("fromAccountId") Integer fromAccountId,
+            @Param("toAccountId") Integer toAccountId
     );
     /** 列表 */
     public List<ChatRoomRecord> list(
             @Param("chatRoomId") Integer chatRoomId,
-            @Param("accountId") Integer accountId,
+            @Param("fromAccountId") Integer fromAccountId,
+            @Param("toAccountId") Integer toAccountId,
             @Param("pageNum") int pageNum,
             @Param("pageSize") int pageSize,
             @Param("orderName") String orderName,

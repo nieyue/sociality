@@ -169,10 +169,10 @@
                                   icon="resources/img/head_2.png";
                               }
                               html+='<div onclick="business.goChat('+json+')" style="border-bottom:1px solid #ececec;padding:5px;cursor:pointer;background-color: #fff;">\n' +
-                                  '            <div style="display: inline-block;width:10%;vertical-align:middle;">\n' +
+                                  '            <div style="display: inline-block;width:10%;">\n' +
                                   '                <img src="'+icon+'" style="width:100%;" alt="">\n' +
                                   '            </div>\n' +
-                                  '            <div style="display: inline-block;width:88%;">\n' +
+                                  '            <div style="display: inline-block;width:88%;vertical-align:top;">\n' +
                                   '                <div style="color:#558eff">'+name+'</div>\n' +
                                   '            </div>\n' +
                                   '        </div>';
@@ -229,12 +229,15 @@
                             if(!icon){
                                 icon="resources/img/head_2.png";
                             }
+                            var statusvalue=friend.friendAccount.status==3?'在线':'离线';
+                            var stauscolor=friend.friendAccount.status==3?'green':'#ccc';
                             html+='<div onclick="business.friendInfo('+json+')" style="border-bottom:1px solid #ececec;padding:5px;cursor:pointer;background-color: #fff;">\n' +
-                                '            <div style="display: inline-block;width:10%;vertical-align:middle;">\n' +
+                                '            <div style="display: inline-block;width:10%;">\n' +
                                 '                <img src="'+icon+'" style="width:100%;" alt="">\n' +
                                 '            </div>\n' +
-                                '            <div style="display: inline-block;width:88%;">\n' +
+                                '            <div style="display: inline-block;width:88%;vertical-align:top;">\n' +
                                 '                <div style="color:#558eff">'+friend.friendAccount.realname+'</div>\n' +
+                                '                <div style="color:'+stauscolor+';font-size:0.6rem;">'+statusvalue+'</div>\n' +
                                 '            </div>\n' +
                                 '        </div>';
                         }

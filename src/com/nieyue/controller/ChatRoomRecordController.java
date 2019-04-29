@@ -39,7 +39,8 @@ public class ChatRoomRecordController {
 	@ApiOperation(value = "聊天房聊天记录列表", notes = "聊天房聊天记录分页浏览")
 	@ApiImplicitParams({
 	  @ApiImplicitParam(name="chatRoomId",value="聊天房id外键",dataType="int", paramType = "query"),
-	  @ApiImplicitParam(name="accountId",value="账户id外键",dataType="int", paramType = "query"),
+	  @ApiImplicitParam(name="fromAccountId",value="发送端账户id外键",dataType="int", paramType = "query"),
+	  @ApiImplicitParam(name="toAccountId",value="接收端账户id外键",dataType="int", paramType = "query"),
 	  @ApiImplicitParam(name="pageNum",value="页头数位",dataType="int", paramType = "query",defaultValue="1"),
 	  @ApiImplicitParam(name="pageSize",value="每页数目",dataType="int", paramType = "query",defaultValue="10"),
 	  @ApiImplicitParam(name="orderName",value="排序字段",dataType="string", paramType = "query",defaultValue="update_date"),
@@ -47,14 +48,15 @@ public class ChatRoomRecordController {
 	  })
 	@RequestMapping(value = "/list", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<ChatRoomRecord>> list(
-			@RequestParam(value="accountId",required=false)Integer chatRoomId,
-			@RequestParam(value="accountId",required=false)Integer accountId,
+			@RequestParam(value="chatRoomId",required=false)Integer chatRoomId,
+			@RequestParam(value="fromAccountId",required=false)Integer fromAccountId,
+			@RequestParam(value="toAccountId",required=false)Integer toAccountId,
 			@RequestParam(value="pageNum",defaultValue="1",required=false)int pageNum,
 			@RequestParam(value="pageSize",defaultValue="10",required=false) int pageSize,
 			@RequestParam(value="orderName",required=false,defaultValue="update_date") String orderName,
 			@RequestParam(value="orderWay",required=false,defaultValue="desc") String orderWay)  {
 			List<ChatRoomRecord> list = new ArrayList<ChatRoomRecord>();
-			list= chatRoomRecordService.list(chatRoomId,accountId,pageNum, pageSize, orderName, orderWay);
+			list= chatRoomRecordService.list(chatRoomId,fromAccountId,toAccountId,pageNum, pageSize, orderName, orderWay);
 			if(list.size()>0){
 				return ResultUtil.getSlefSRSuccessList(list);
 			}else{
@@ -117,14 +119,16 @@ public class ChatRoomRecordController {
 	@ApiOperation(value = "聊天房聊天记录数量", notes = "聊天房聊天记录数量查询")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name="chatRoomId",value="聊天房id外键",dataType="int", paramType = "query"),
-			@ApiImplicitParam(name="accountId",value="账户id外键",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="fromAccountId",value="发送端账户id外键",dataType="int", paramType = "query"),
+			@ApiImplicitParam(name="toAccountId",value="接收端账户id外键",dataType="int", paramType = "query"),
 	})
 	@RequestMapping(value = "/count", method = {RequestMethod.GET,RequestMethod.POST})
 	public @ResponseBody StateResultList<List<Integer>> count(
 			@RequestParam(value="chatRoomId",required=false)Integer chatRoomId,
-			@RequestParam(value="accountId",required=false)Integer accountId,
+			@RequestParam(value="fromAccountId",required=false)Integer fromAccountId,
+			@RequestParam(value="toAccountId",required=false)Integer toAccountId,
 			HttpSession session)  {
-		Integer count = chatRoomRecordService.count(chatRoomId,accountId);
+		Integer count = chatRoomRecordService.count(chatRoomId,fromAccountId,toAccountId);
 			List<Integer> list = new ArrayList<Integer>();
 			list.add(count);
 			return ResultUtil.getSlefSRSuccessList(list);

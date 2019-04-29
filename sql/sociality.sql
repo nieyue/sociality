@@ -28,7 +28,7 @@ icon varchar(255) COMMENT '头像',
 birth_date datetime COMMENT '出生年月日',
 create_date datetime COMMENT '创建时间',
 login_date datetime COMMENT '登陆时间',
-status tinyint DEFAULT 0 COMMENT '状态，默认0正常，1封禁，2异常',
+status tinyint DEFAULT 0 COMMENT '状态，默认0离线，1封禁，2异常，3在线',
 role_id int(11) COMMENT '角色id外键',
 PRIMARY KEY (account_id),
 INDEX INDEX_REALNAME (realname) USING BTREE,
@@ -120,10 +120,12 @@ content longtext COMMENT '内容',
 create_date datetime COMMENT '创建时间',
 update_date datetime COMMENT '更新时间',
 chat_room_id int(11) COMMENT '聊天房id外键',
-account_id int(11) COMMENT '账户id外键',
+from_account_id int(11) COMMENT '发送端账户id外键',
+to_account_id int(11) COMMENT '接受端账户id外键',
 PRIMARY KEY (chat_room_record_id),
 INDEX INDEX_CHATROOMID (chat_room_id) USING BTREE,
-INDEX INDEX_ACCOUNTID (account_id) USING BTREE
+INDEX INDEX_FromACCOUNTID (from_account_id) USING BTREE,
+INDEX INDEX_TOACCOUNTID (to_account_id) USING BTREE
 )ENGINE = InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8 COMMENT='聊天房聊天记录表';
 
 #创建公告表

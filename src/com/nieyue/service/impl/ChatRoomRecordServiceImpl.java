@@ -45,20 +45,20 @@ public class ChatRoomRecordServiceImpl implements ChatRoomRecordService{
 	public ChatRoomRecord load(Integer chatRoomRecordId) {
 		ChatRoomRecord r = chatRoomRecordDao.load(chatRoomRecordId);
 		if(r!=null){
-			Account account = accountService.load(r.getAccountId());
-			r.setAccount(account);
+			Account fromAccount = accountService.load(r.getFromAccountId());
+			r.setFromAccount(fromAccount);
 		}
 		return r;
 	}
 
 	@Override
-	public int count(Integer chatRoomId,Integer accountId) {
-		int c = chatRoomRecordDao.count(chatRoomId,accountId);
+	public int count(Integer chatRoomId,Integer fromAccountId,Integer toAccountId) {
+		int c = chatRoomRecordDao.count(chatRoomId,fromAccountId,toAccountId);
 		return c;
 	}
 
 	@Override
-	public List<ChatRoomRecord> list(Integer chatRoomId,Integer accountId,int pageNum, int pageSize,
+	public List<ChatRoomRecord> list(Integer chatRoomId,Integer fromAccountId,Integer toAccountId,int pageNum, int pageSize,
 			String orderName, String orderWay) {
 		if(pageNum<1){
 			pageNum=1;
@@ -66,11 +66,11 @@ public class ChatRoomRecordServiceImpl implements ChatRoomRecordService{
 		if(pageSize<1){
 			pageSize=0;//没有数据
 		}
-		List<ChatRoomRecord> l = chatRoomRecordDao.list(chatRoomId,accountId,pageNum-1, pageSize, orderName, orderWay);
+		List<ChatRoomRecord> l = chatRoomRecordDao.list(chatRoomId,fromAccountId,toAccountId,pageNum-1, pageSize, orderName, orderWay);
 		l.forEach(r->{
 			if(r!=null){
-				Account account = accountService.load(r.getAccountId());
-				r.setAccount(account);
+				Account account = accountService.load(r.getFromAccountId());
+				r.setFromAccount(account);
 			}
 		});
 		return l;

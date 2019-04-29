@@ -127,16 +127,16 @@
         <span style="cursor:pointer;float:left;margin-top:8px;" onclick="business.goback()"><</span>
         <span id="name" style="display:inline-block;margin-top:8px;">名称</span>
     </div>
-
+    <div id="audiovideowrap" style="position:absolute;top:77px;left:0;width:100%;z-index:99;">
+        <audio id="audioUrl" src="" style="display: none;width:100%;" controls="controls">
+            浏览器不支持！
+        </audio>
+        <video id="videoUrl" src="" style="display: none;width:100%;" controls="controls">
+            浏览器不支持！
+        </video>
+    </div>
     <div id="chatRoomRecordWrap" style="background-color:#ececec;width:100%;height:100%;position:absolute;top:0;left:0;box-sizing: border-box;padding:76px 0 38px 0;z-index:9;overflow: auto; ">
-       <div>
-           <audio id="audioUrl" src="" style="display: none;width:100%;" controls="controls">
-               浏览器不支持！
-           </audio>
-           <video id="videoUrl" src="" style="display: none;width:100%;" controls="controls">
-               浏览器不支持！
-           </video>
-       </div>
+
         <div id="chatRoomRecordList">
            <!--<div style="padding:5px;cursor:pointer;text-align:left;">
                <div style="display: inline-block;width:16%;vertical-align:top;">
@@ -179,10 +179,7 @@
 <script src="resources/js/datetime.js"></script>
 <script src="resources/js/base.js"></script>
 <script>
-    //计算chatRoomRecordWrap
-    setInterval(function(){
-        $("#chatRoomRecordWrap").css("padding-bottom",$("#messageWrap").height())
-    },20)
+
 
     //socket
         var wsPath=wsPath();
@@ -218,6 +215,15 @@
         function init(){
             sock.onopen = function (e) {
                 heartCheck.start();
+                $("#chatRoomRecordList").html("")
+                //初始化获取历史消息(接受端数据)
+                var message={
+                    "toAccountId":JSON.parse(localStorage.getItem("account")).accountId,
+                    "chatRoomId":business.getQueryString("chatRoomId"),
+                    "number":10,//获取历史数据
+                    "content":''
+                };
+                sock.send(JSON.stringify(message))
                 console.info(" WebSocket Connection Success ! ");
             };
             sock.onmessage = function (e) {
@@ -234,13 +240,13 @@
                     console.log(chatRoomRecord)
                     if(chatRoomRecord.chatRoomId==business.getQueryString("chatRoomId")){
                         var html="";
-                        var icon=chatRoomRecord.account.icon?chatRoomRecord.account.icon:'resources/img/head_2.png';
-                        if(chatRoomRecord.accountId==JSON.parse(localStorage.getItem("account")).accountId){
+                        var icon=chatRoomRecord.fromAccount.icon?chatRoomRecord.fromAccount.icon:'resources/img/head_2.png';
+                        if(chatRoomRecord.fromAccountId==JSON.parse(localStorage.getItem("account")).accountId){
                            //自己发的消息，在右边
                            html='<div style="padding:5px;cursor:pointer;text-align:right;">\n' +
                                '               <div style="display: inline-block;width:70%;margin-left:12%;">\n' +
                                '                   <div style="display: inline-block;width:auto;max-width:100%;">\n' +
-                               '                       <div style="color:#558eff;text-indent:1rem;">'+chatRoomRecord.account.realname+'</div>\n' +
+                               '                       <div style="color:#558eff;text-indent:1rem;">'+chatRoomRecord.fromAccount.realname+'</div>\n' +
                                '                       <div class="chat-content-rightwrap" style="text-align:left;">'+chatRoomRecord.content+'</div>\n' +
                                '                   </div>\n' +
                                '               </div>\n' +
@@ -256,15 +262,22 @@
                                 '               </div>\n' +
                                 '               <div style="display: inline-block;width:70%;">\n' +
                                 '                   <div style="display: inline-block;width:auto;max-width:100%;">\n' +
-                                '                       <div style="color:#558eff;text-indent:1rem;">'+chatRoomRecord.account.realname+'</div>\n' +
+                                '                       <div style="color:#558eff;text-indent:1rem;">'+chatRoomRecord.fromAccount.realname+'</div>\n' +
                                 '                       <div class="chat-content-leftwrap">'+chatRoomRecord.content+'</div>\n' +
                                 '                   </div>\n' +
                                 '               </div>\n' +
                                 '           </div>';
                         }
                         $("#chatRoomRecordList").append(html)
-                        //滑动到底部
-                        $("#chatRoomRecordWrap").scrollTop($("#chatRoomRecordWrap")[0].scrollHeight);
+
+                        //计算chatRoomRecordWrap
+                        setInterval(function(){
+                            $("#chatRoomRecordWrap").css("padding-bottom",$("#messageWrap").height());
+                        },20)
+                        setTimeout(function(){
+                            //滑动到底部
+                            $("#chatRoomRecordWrap").scrollTop($("#chatRoomRecordWrap")[0].scrollHeight);
+                        },30)
                     }
                 }
             };
@@ -304,7 +317,7 @@
             start: function(){
                 var _this = this;
                 this.timeoutObj = setTimeout(function(){
-                    sock.send("{}");
+                    sock.send("{}")
                     _this.serverTimeoutObj = setTimeout(function(){
                         console.log(" start-sock ..close")
                         sock.close();
@@ -350,6 +363,21 @@
                        $("#videoUrl").attr("src",chatRoom.url);
                        $("#videoUrl").show();
                    }
+                   $("#chatRoomRecordWrap").scroll(function(){
+                       $("#audiovideowrap").css("position","absolute")
+                       $("#audiovideowrap").css("top","77px")
+                       $("#audiovideowrap").css("left","0")
+                   })
+                    if($("#audioUrl").css("display")!='none' || $("#videoUrl").css("display")!='none'){
+                        var audiovideowrapHeight=$("#audiovideowrap").css("height");
+                        var avwh=audiovideowrapHeight.replace("px","");
+                        $("#chatRoomRecordWrap").css("padding-top",(parseFloat(avwh)+120)+'px')
+                    }
+                   /* $("#chatRoomRecordList").css("position","absolute")
+                    console.log($("#audiovideowrap").css("height"))
+                    $("#chatRoomRecordList").css("top",$("#audiovideowrap").css("height"))
+                    $("#chatRoomRecordList").css("left","0")
+                    $("#chatRoomRecordList").css("overflow","auto")*/
                     if(chatRoom.type!=1){
                         $("#name").text(chatRoom.name)
                     }else{
@@ -378,7 +406,7 @@
             return;
         }
         var message={
-            "accountId":JSON.parse(localStorage.getItem("account")).accountId,
+            "fromAccountId":JSON.parse(localStorage.getItem("account")).accountId,
             "chatRoomId":business.getQueryString("chatRoomId"),
             "content":content
         };

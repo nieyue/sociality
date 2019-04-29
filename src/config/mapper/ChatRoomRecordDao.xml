@@ -12,7 +12,8 @@
    		 create_date,
    		 update_date,
    		 chat_room_id,
-   		 account_id
+   		 from_account_id,
+   		 to_account_id
    		 )
    VALUES
     	 (
@@ -20,7 +21,8 @@
     	 #{createDate},
     	 #{updateDate},
     	 #{chatRoomId},
-    	 #{accountId}
+    	 #{fromAccountId},
+    	 #{toAccountId}
     	 )
 </insert>  
 <!-- 更新 -->
@@ -40,8 +42,11 @@
 		<if test="chatRoomId!=null">
 			chat_room_id=#{chatRoomId},
 		</if>
-		<if test="accountId!=null">
-			account_id=#{accountId},
+		<if test="fromAccountId!=null">
+			from_account_id=#{fromAccountId},
+		</if>
+		<if test="toAccountId!=null">
+			to_account_id=#{toAccountId},
 		</if>
 	</set>
     WHERE
@@ -61,7 +66,8 @@ SELECT
    		 create_date,
    		 update_date,
    		 chat_room_id,
-   		 account_id
+   		 from_account_id,
+   		 to_account_id
 FROM chat_room_record_tb
 WHERE chat_room_record_id=#{chatRoomRecordId}
 </select>
@@ -74,14 +80,18 @@ WHERE chat_room_record_id=#{chatRoomRecordId}
 		create_date,
 		update_date,
 		chat_room_id,
-		account_id
+		from_account_id,
+		to_account_id
 	FROM chat_room_record_tb
 	<where>
 		<if test="chatRoomId!=null">
 			AND chat_room_id=#{chatRoomId}
 		</if>
-		<if test="accountId!=null">
-			AND account_id=#{accountId}
+		<if test="fromAccountId!=null">
+			AND from_account_id=#{fromAccountId}
+		</if>
+		<if test="toAccountId!=null">
+			AND to_account_id=#{toAccountId}
 		</if>
 		AND ${orderName}
 		<if test="orderWay=='asc'">
@@ -95,8 +105,11 @@ WHERE chat_room_record_id=#{chatRoomRecordId}
 				<if test="chatRoomId!=null">
 					AND chat_room_id=#{chatRoomId}
 				</if>
-				<if test="accountId!=null">
-					AND account_id=#{accountId}
+				<if test="fromAccountId!=null">
+					AND from_account_id=#{fromAccountId}
+				</if>
+				<if test="toAccountId!=null">
+					AND to_account_id=#{toAccountId}
 				</if>
 			</where>
 			ORDER BY
@@ -119,8 +132,11 @@ WHERE chat_room_record_id=#{chatRoomRecordId}
 		<if test="chatRoomId!=null">
 			AND chat_room_id=#{chatRoomId}
 		</if>
-		<if test="accountId!=null">
-			AND account_id=#{accountId}
+		<if test="fromAccountId!=null">
+			AND from_account_id=#{fromAccountId}
+		</if>
+		<if test="toAccountId!=null">
+			AND to_account_id=#{toAccountId}
 		</if>
 	</where>
 </select>

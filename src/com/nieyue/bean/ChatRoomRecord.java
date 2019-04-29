@@ -42,15 +42,20 @@ public class ChatRoomRecord implements Serializable{
     @ApiModelProperty(value="聊天房id外键")
     private Integer chatRoomId;
     /**
-     * 账户id外键
+     * 发送端账户id外键
      */
     @ApiModelProperty(value="账户id外键")
-    private Integer accountId;
+    private Integer fromAccountId;
     /**
-     * 账户
+     * 接收端账户id外键
      */
-    @ApiModelProperty(value="账户")
-    private Account account;
+    @ApiModelProperty(value="接收端账户id外键")
+    private Integer toAccountId;
+    /**
+     * 发送端账户
+     */
+    @ApiModelProperty(value="发送端账户")
+    private Account fromAccount;
 
     public ChatRoomRecord() {
     }
@@ -75,12 +80,16 @@ public class ChatRoomRecord implements Serializable{
         return this.chatRoomId;
     }
 
-    public Integer getAccountId() {
-        return this.accountId;
+    public Integer getFromAccountId() {
+        return this.fromAccountId;
     }
 
-    public Account getAccount() {
-        return this.account;
+    public Integer getToAccountId() {
+        return this.toAccountId;
+    }
+
+    public Account getFromAccount() {
+        return this.fromAccount;
     }
 
     public void setChatRoomRecordId(Integer chatRoomRecordId) {
@@ -103,12 +112,16 @@ public class ChatRoomRecord implements Serializable{
         this.chatRoomId = chatRoomId;
     }
 
-    public void setAccountId(Integer accountId) {
-        this.accountId = accountId;
+    public void setFromAccountId(Integer fromAccountId) {
+        this.fromAccountId = fromAccountId;
     }
 
-    public void setAccount(Account account) {
-        this.account = account;
+    public void setToAccountId(Integer toAccountId) {
+        this.toAccountId = toAccountId;
+    }
+
+    public void setFromAccount(Account fromAccount) {
+        this.fromAccount = fromAccount;
     }
 
     public boolean equals(Object o) {
@@ -135,12 +148,18 @@ public class ChatRoomRecord implements Serializable{
         final Object other$chatRoomId = other.getChatRoomId();
         if (this$chatRoomId == null ? other$chatRoomId != null : !this$chatRoomId.equals(other$chatRoomId))
             return false;
-        final Object this$accountId = this.getAccountId();
-        final Object other$accountId = other.getAccountId();
-        if (this$accountId == null ? other$accountId != null : !this$accountId.equals(other$accountId)) return false;
-        final Object this$account = this.getAccount();
-        final Object other$account = other.getAccount();
-        if (this$account == null ? other$account != null : !this$account.equals(other$account)) return false;
+        final Object this$fromAccountId = this.getFromAccountId();
+        final Object other$fromAccountId = other.getFromAccountId();
+        if (this$fromAccountId == null ? other$fromAccountId != null : !this$fromAccountId.equals(other$fromAccountId))
+            return false;
+        final Object this$toAccountId = this.getToAccountId();
+        final Object other$toAccountId = other.getToAccountId();
+        if (this$toAccountId == null ? other$toAccountId != null : !this$toAccountId.equals(other$toAccountId))
+            return false;
+        final Object this$fromAccount = this.getFromAccount();
+        final Object other$fromAccount = other.getFromAccount();
+        if (this$fromAccount == null ? other$fromAccount != null : !this$fromAccount.equals(other$fromAccount))
+            return false;
         return true;
     }
 
@@ -157,10 +176,12 @@ public class ChatRoomRecord implements Serializable{
         result = result * PRIME + ($updateDate == null ? 43 : $updateDate.hashCode());
         final Object $chatRoomId = this.getChatRoomId();
         result = result * PRIME + ($chatRoomId == null ? 43 : $chatRoomId.hashCode());
-        final Object $accountId = this.getAccountId();
-        result = result * PRIME + ($accountId == null ? 43 : $accountId.hashCode());
-        final Object $account = this.getAccount();
-        result = result * PRIME + ($account == null ? 43 : $account.hashCode());
+        final Object $fromAccountId = this.getFromAccountId();
+        result = result * PRIME + ($fromAccountId == null ? 43 : $fromAccountId.hashCode());
+        final Object $toAccountId = this.getToAccountId();
+        result = result * PRIME + ($toAccountId == null ? 43 : $toAccountId.hashCode());
+        final Object $fromAccount = this.getFromAccount();
+        result = result * PRIME + ($fromAccount == null ? 43 : $fromAccount.hashCode());
         return result;
     }
 
@@ -169,7 +190,7 @@ public class ChatRoomRecord implements Serializable{
     }
 
     public String toString() {
-        return "ChatRoomRecord(chatRoomRecordId=" + this.getChatRoomRecordId() + ", content=" + this.getContent() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", chatRoomId=" + this.getChatRoomId() + ", accountId=" + this.getAccountId() + ", account=" + this.getAccount() + ")";
+        return "ChatRoomRecord(chatRoomRecordId=" + this.getChatRoomRecordId() + ", content=" + this.getContent() + ", createDate=" + this.getCreateDate() + ", updateDate=" + this.getUpdateDate() + ", chatRoomId=" + this.getChatRoomId() + ", fromAccountId=" + this.getFromAccountId() + ", toAccountId=" + this.getToAccountId() + ", fromAccount=" + this.getFromAccount() + ")";
     }
 }
 

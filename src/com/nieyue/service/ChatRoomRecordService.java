@@ -19,11 +19,12 @@ public interface ChatRoomRecordService {
 	/** 装载 */
 	public ChatRoomRecord load(Integer chatRoomRecordId);
 	/** 数目 */
-	public int count(Integer chatRoomId,Integer accountId);
+	public int count(Integer chatRoomId,Integer fromAccountId,Integer toAccountId);
 	/** 列表 */
 	public List<ChatRoomRecord> list(
             Integer chatRoomId,
-            Integer accountId,
+			Integer fromAccountId,
+			Integer toAccountId,
             int pageNum,
             int pageSize,
             String orderName,

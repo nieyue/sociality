@@ -54,7 +54,7 @@
         <!-- mybatis版本号 -->
         <mybatis.version>3.4.6</mybatis.version>
         <!-- log4j日志文件管理包版本 -->
-        <log4j.version>2.6</log4j.version>
+        <log4j.version>2.16.0</log4j.version>
     </properties>
 
     <dependencies>
